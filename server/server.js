@@ -1,20 +1,18 @@
 const express = require("express");
-const mongoose = require("mongoose");
-const cors = require("cors");
-
 const app = express();
 
-app.use(cors());
+// Middleware (VERY IMPORTANT)
 app.use(express.json());
-
-// Connect MongoDB
-mongoose.connect("mongodb://127.0.0.1:27017/hackathon")
-.then(() => console.log("MongoDB Connected"))
-.catch(err => console.log(err));
 
 // Test route
 app.get("/", (req, res) => {
-    res.send("Backend + DB running");
+    res.send("Backend running");
+});
+
+// Sample POST route
+app.post("/add", (req, res) => {
+    console.log(req.body);
+    res.send("Data received");
 });
 
 app.listen(5000, () => {
