@@ -1,39 +1,15 @@
-import "./App.css";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import Home from "./Home";
+import Task from "./Task";
 
 function App() {
   return (
-    <div className="main">
-
-      {/* 🔵 Top Government Bar */}
-      <div style={{
-        background: "#0d47a1",
-        color: "white",
-        padding: "10px",
-        fontWeight: "500"
-      }}>
-        Government Volunteer Management System
-      </div>
-
-      <div className="overlay">
-
-        <div className="headerBox">
-  <h1 className="title">🌍 Smart Volunteer System</h1>
-  <p className="subtitle">Connecting Needs with Helping Hands</p>
-</div>
-        <div className="menu">
-
-          <button className="btn">➕ Add NGO Task</button>
-
-          <button className="btn">🙋 Register Volunteer</button>
-
-          <button className="btn">⚡ Run Matching</button>
-
-          <button className="btn">📊 View Dashboard</button>
-
-        </div>
-
-      </div>
-    </div>
+    <Router>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/task" element={<Task />} />
+      </Routes>
+    </Router>
   );
 }
 
