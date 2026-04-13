@@ -6,27 +6,31 @@ function Tasks() {
   const [description, setDescription] = useState("");
 
   const handleSubmit = () => {
-    alert("Task Submitted (we'll connect backend next)");
+    alert("Task Submitted 🚀");
   };
 
   return (
-    <div className="task-container">
-      <h2>Add New Task</h2>
+    <div className="task-wrapper">
 
-      <input
-        type="text"
-        placeholder="Task Title"
-        onChange={(e) => setTitle(e.target.value)}
-      />
+      <div className="task-card">
+        <h2>Add New Task</h2>
 
-      <textarea
-        placeholder="Task Description"
-        onChange={(e) => setDescription(e.target.value)}
-      ></textarea>
+        <input
+          type="text"
+          placeholder="Task Title"
+          onChange={(e) => setTitle(e.target.value)}
+        />
 
-      <button className="btn" onClick={handleSubmit}>
-        Submit Task
-      </button>
+        <textarea
+          placeholder="Task Description"
+          onChange={(e) => setDescription(e.target.value)}
+        ></textarea>
+
+        <button className="btn" onClick={handleSubmit}>
+          Submit Task
+        </button>
+      </div>
+
     </div>
   );
 }

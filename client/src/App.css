@@ -271,3 +271,44 @@ body {
 .task-container button {
   align-self: center;
 }
+/* WRAPPER */
+.task-wrapper {
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #f4f6f8;
+}
+
+/* CARD */
+.task-card {
+  background: white;
+  padding: 30px;
+  width: 400px;
+  border-radius: 15px;
+  text-align: center;
+
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  animation: fadeIn 1s ease-in-out;
+}
+
+/* INPUTS */
+.task-card input,
+.task-card textarea {
+  width: 100%;
+  padding: 12px;
+  margin-top: 15px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+}
+
+/* TEXTAREA */
+.task-card textarea {
+  height: 100px;
+}
+
+/* BUTTON */
+.task-card button {
+  margin-top: 20px;
+  width: 100%;
+}
