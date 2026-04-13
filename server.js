@@ -1,25 +1,18 @@
 const express = require("express");
-const mongoose = require("mongoose");
-
-mongoose.set("strictQuery", false);
+const cors = require("cors");
+const connectDB = require("./config/db");
 
 const app = express();
+
+app.use(cors());
 app.use(express.json());
 
-// CONNECT DATABASE
-mongoose.connect("mongodb://127.0.0.1:27017/VolunteerDB", {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-})
-.then(() => {
-  console.log("✅ MongoDB Connected");
+// ✅ connect DB
+connectDB();
 
-  // 🚀 START SERVER ONLY AFTER DB CONNECTS
-  app.listen(5000, () => {
-    console.log("Server started on port 5000");
-  });
-})
-.catch(err => console.log("❌ DB Error:", err));
-
-// ROUTES
+// ✅ routes
 app.use("/api/volunteers", require("./routes/volunteerRoutes"));
+
+app.listen(5000, () => {
+  console.log("🚀 Server running on port 5000");
+});

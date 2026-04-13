@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { registerVolunteer } = require("c:/Users/asd/OneDrive/Desktop/smart-volunteer-system/server/Controllers/volunteerController.js");
+const { registerVolunteer } = require("../controllers/volunteerController");
 
 router.post("/register", registerVolunteer);
 

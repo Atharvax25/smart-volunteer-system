@@ -1,16 +1,12 @@
-const Volunteer = require("../models/volunteer");
+const Volunteer = require("../models/Volunteer");
 
-// SAVE DATA
 exports.registerVolunteer = async (req, res) => {
   try {
-    const newVolunteer = new Volunteer(req.body);
-    await newVolunteer.save();
+    const data = new Volunteer(req.body);
+    await data.save();
 
-    res.status(201).json({
-      message: "Volunteer Registered Successfully",
-      data: newVolunteer
-    });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.json({ message: "Saved successfully", data });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 };
