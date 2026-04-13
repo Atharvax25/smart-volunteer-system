@@ -4,7 +4,9 @@ import "./App.css";
 import AOS from "aos";
 import "aos/dist/aos.css";
 import { useEffect } from "react";
+
 import Footer from "./Footer";
+
 function Home() {
 
   useEffect(() => {
@@ -16,6 +18,7 @@ function Home() {
 
       {/* HERO */}
       <div
+        id="home"
         className="hero"
         style={{
           backgroundImage: `linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url(${heroImg})`
@@ -37,8 +40,26 @@ function Home() {
         </div>
       </div>
 
+      {/* STATS */}
+      <div className="stats">
+        <div className="stat-box">
+          <h2>100+</h2>
+          <p>Volunteers</p>
+        </div>
+
+        <div className="stat-box">
+          <h2>50+</h2>
+          <p>Tasks Completed</p>
+        </div>
+
+        <div className="stat-box">
+          <h2>20+</h2>
+          <p>NGOs Connected</p>
+        </div>
+      </div>
+
       {/* ABOUT */}
-      <div className="about" data-aos="fade-up">
+      <div id="about" className="about" data-aos="fade-up">
         <h2>About SevaLink</h2>
         <p>
           SevaLink connects NGOs with passionate volunteers, making it easier
@@ -47,7 +68,7 @@ function Home() {
       </div>
 
       {/* FEATURES */}
-      <div className="features">
+      <div id="features" className="features">
 
         <div className="card" data-aos="zoom-in">
           <div className="icon">📍</div>
@@ -68,10 +89,11 @@ function Home() {
         </div>
 
       </div>
+
+      {/* FOOTER */}
       <Footer />
 
     </div>
-    
   );
 }
 

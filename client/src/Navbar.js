@@ -7,10 +7,14 @@ function Navbar() {
       <h2 className="logo">🤝 SevaLink</h2>
 
       <div className="nav-links">
+        {/* FIXED */}
         <Link to="/">Home</Link>
-        <Link to="/about">About</Link>
+
+        {/* Optional scroll (only works on home) */}
+        <a href="/#about">About</a>
+        <a href="/#features">Features</a>
+
         <Link to="/tasks">Tasks</Link>
-        <Link to="/contact">Contact</Link>
         <Link to="/volunteer">Volunteer</Link>
         <Link to="/admin">Admin</Link>
       </div>

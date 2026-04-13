@@ -1,7 +1,20 @@
 import "./App.css";
-import adminBg from "./assets/admin-bg.png";
+import { useState } from "react";
+import adminBg from "./assets/admin-bg.png"; // or .jpg
 
 function Admin() {
+
+  // 🔥 STATES
+  const [search, setSearch] = useState("");
+  const [filter, setFilter] = useState("");
+
+  // 🔥 SAMPLE DATA (later from backend)
+  const tasks = [
+    { title: "Food Distribution", location: "Pune", severity: "high" },
+    { title: "Teaching Kids", location: "Mumbai", severity: "medium" },
+    { title: "Medical Camp", location: "Delhi", severity: "high" }
+  ];
+
   return (
     <div
   className="admin-container"
@@ -9,16 +22,15 @@ function Admin() {
     backgroundImage: `linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url(${adminBg})`
   }}
 >
-    >
+
       {/* TITLE */}
       <h2 className="admin-title">📊 Admin Dashboard</h2>
 
       {/* STATS */}
       <div className="admin-stats">
-
         <div className="stat-card">
-          <h3>📋 Total Tasks</h3>
-          <p>10</p>
+          <h3>📋 Tasks</h3>
+          <p>{tasks.length}</p>
         </div>
 
         <div className="stat-card">
@@ -27,44 +39,51 @@ function Admin() {
         </div>
 
         <div className="stat-card">
-          <h3>⚡ Active Tasks</h3>
+          <h3>⚡ Active</h3>
           <p>7</p>
         </div>
-
       </div>
 
-      {/* TASK SECTION */}
+      {/* 🔍 SEARCH + FILTER */}
+      <div className="admin-controls">
+        <input
+          type="text"
+          placeholder="Search tasks..."
+          onChange={(e) => setSearch(e.target.value)}
+        />
+
+        <select onChange={(e) => setFilter(e.target.value)}>
+          <option value="">All</option>
+          <option value="low">Low</option>
+          <option value="medium">Medium</option>
+          <option value="high">High</option>
+        </select>
+      </div>
+
+      {/* TASK LIST */}
       <div className="admin-section">
-        <h3>📍 Recent Tasks</h3>
+        <h3>📍 Tasks</h3>
 
-        <div className="list-card">
-          Food Distribution - Pune (High)
-        </div>
-
-        <div className="list-card">
-          Teaching Kids - Mumbai (Medium)
-        </div>
-
-        <div className="list-card">
-          Medical Camp - Delhi (High)
-        </div>
+        {tasks
+          .filter(task =>
+            task.title.toLowerCase().includes(search.toLowerCase())
+          )
+          .filter(task =>
+            filter === "" ? true : task.severity === filter
+          )
+          .map((task, index) => (
+            <div key={index} className="list-card">
+              {task.title} - {task.location} ({task.severity})
+            </div>
+          ))
+        }
       </div>
 
-      {/* VOLUNTEER SECTION */}
+      {/* VOLUNTEERS */}
       <div className="admin-section">
         <h3>👥 Volunteers</h3>
-
-        <div className="list-card">
-          Rahul - Teaching - Pune
-        </div>
-
-        <div className="list-card">
-          Priya - Medical - Mumbai
-        </div>
-
-        <div className="list-card">
-          Amit - Logistics - Delhi
-        </div>
+        <div className="list-card">Rahul - Teaching - Pune</div>
+        <div className="list-card">Priya - Medical - Mumbai</div>
       </div>
 
     </div>

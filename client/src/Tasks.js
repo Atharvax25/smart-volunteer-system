@@ -1,5 +1,6 @@
 import "./App.css";
 import { useState } from "react";
+import { toast } from "react-toastify"; // ✅ FIXED (top)
 
 function Tasks() {
   const [title, setTitle] = useState("");
@@ -16,7 +17,9 @@ function Tasks() {
     };
 
     console.log(data);
-    alert("Task Submitted 🚀");
+
+    // ✅ Toast used here
+    toast.success("Task submitted successfully 🚀");
   };
 
   return (
