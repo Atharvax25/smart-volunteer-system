@@ -6,7 +6,6 @@ import { useEffect, useState } from "react";
 
 import Home from "./Home";
 import Tasks from "./Tasks";
-import Volunteer from "./Volunteer";
 import Admin from "./Admin";
 import Auth from "./Auth";
 import { ToastContainer } from "react-toastify";
@@ -37,7 +36,6 @@ function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/tasks" element={<Tasks />} />
-        <Route path="/volunteer" element={<Volunteer />} />
         <Route path="/admin" element={<Admin />} />
         <Route path="/auth" element={<Auth />} />
       </Routes>
