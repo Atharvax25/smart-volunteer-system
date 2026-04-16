@@ -1,20 +1,37 @@
 const express = require("express");
-const app = express();
+const cors = require("cors");
+const mongoose = require("mongoose");
 
-// Middleware (VERY IMPORTANT)
+const authRoutes = require("./routes/authRoutes");
+const taskRoutes = require("./routes/taskRoutes");
+
+const app = express();
+const PORT = process.env.PORT || 5000;
+const MONGO_URI = process.env.MONGO_URI || "mongodb://127.0.0.1:27017/sevalink";
+
+app.use(
+  cors({
+    origin: "http://localhost:3000",
+  })
+);
 app.use(express.json());
 
-// Test route
 app.get("/", (req, res) => {
-    res.send("Backend running");
+  res.json({ message: "SevaLink backend running" });
 });
 
-// Sample POST route
-app.post("/add", (req, res) => {
-    console.log(req.body);
-    res.send("Data received");
-});
+app.use("/api/auth", authRoutes);
+app.use("/api/tasks", taskRoutes);
 
-app.listen(5000, () => {
-    console.log("Server started on port 5000");
-});
+mongoose
+  .connect(MONGO_URI)
+  .then(() => {
+    console.log("MongoDB connected");
+    app.listen(PORT, () => {
+      console.log(`Server running on port ${PORT}`);
+    });
+  })
+  .catch((error) => {
+    console.error("MongoDB connection error", error.message);
+    process.exit(1);
+  });

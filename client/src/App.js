@@ -8,6 +8,7 @@ import Home from "./Home";
 import Tasks from "./Tasks";
 import Volunteer from "./Volunteer";
 import Admin from "./Admin";
+import Auth from "./Auth";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -28,11 +29,7 @@ function App() {
 
   return (
     <Router>
-
-      <div
-        className="scroll-bar"
-        style={{ width: `${scroll}%` }}
-      ></div>
+      <div className="scroll-bar" style={{ width: `${scroll}%` }}></div>
 
       <Navbar />
       <ToastContainer />
@@ -42,8 +39,8 @@ function App() {
         <Route path="/tasks" element={<Tasks />} />
         <Route path="/volunteer" element={<Volunteer />} />
         <Route path="/admin" element={<Admin />} />
+        <Route path="/auth" element={<Auth />} />
       </Routes>
-
     </Router>
   );
 }

@@ -1,65 +1,40 @@
-import "./App.css";
-import { useState } from "react";
-import { motion } from "framer-motion";
+import { useState, useEffect } from "react";
 
 function Volunteer() {
-  const [name, setName] = useState("");
-  const [skills, setSkills] = useState("");
-  const [location, setLocation] = useState("");
+  const [tasks, setTasks] = useState([]);
 
-  const handleSubmit = () => {
-    const data = {
-      name,
-      skills,
-      location
-    };
+  useEffect(() => {
+    const dummyTasks = [
+      {
+        _id: 1,
+        title: "Medical Help",
+        location: "Mumbai",
+        skills: "medical"
+      },
+      {
+        _id: 2,
+        title: "Teaching Kids",
+        location: "Delhi",
+        skills: "teaching"
+      }
+    ];
 
-    console.log(data);
-    alert("Registered Successfully 🚀");
-  };
+    setTasks(dummyTasks);
+  }, []);
 
   return (
-    <div className="task-wrapper">
+    <div>
 
-      <div className="task-card">
+      <h2>My Tasks</h2>
 
-        <h2>Join as Volunteer</h2>
+      {tasks.map(task => (
+        <div key={task._id} className="list-card">
+          <h4>{task.title}</h4>
 
-        <p className="task-desc">
-          Become a part of SevaLink and contribute your skills to help communities.
-        </p>
-
-        {/* NAME */}
-        <input
-          type="text"
-          placeholder="Your Name"
-          onChange={(e) => setName(e.target.value)}
-        />
-
-        {/* SKILLS */}
-        <input
-          type="text"
-          placeholder="Your Skills (e.g. Teaching, Medical Help)"
-          onChange={(e) => setSkills(e.target.value)}
-        />
-
-        {/* LOCATION */}
-        <input
-          type="text"
-          placeholder="Your Location"
-          onChange={(e) => setLocation(e.target.value)}
-        />
-
-        {/* BUTTON */}
-        <button className="btn" onClick={handleSubmit}>
-          Register
-        </button>
-
-        <p className="task-note">
-          💡 Tip: Add clear skills to get matched with the right tasks
-        </p>
-
-      </div>
+          <p>📍 {task.location}</p>
+          <p>🛠 Skills: {task.skills}</p>
+        </div>
+      ))}
 
     </div>
   );
