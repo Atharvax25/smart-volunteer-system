@@ -108,6 +108,11 @@ const taskSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
+    mapLink: {
+      type: String,
+      default: "",
+      trim: true,
+    },
     geoLocation: {
       lat: {
         type: Number,
@@ -166,7 +171,7 @@ const taskSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["pending", "open", "pending_confirmation", "assigned", "completed"],
+      enum: ["pending", "open", "pending_confirmation", "assigned", "completion_requested", "completed"],
       default: "open",
     },
     assignedTo: {
@@ -201,6 +206,7 @@ const taskSchema = new mongoose.Schema(
       default: [],
     },
     assignedAt: Date,
+    completionRequestedAt: Date,
     completedAt: Date,
   },
   {

@@ -44,44 +44,44 @@ const featureCards = [
 ];
 
 const heroStats = [
-  { value: "120+", label: "Active helpers" },
-  { value: "48hr", label: "Average response time" },
-  { value: "35+", label: "Connected partners" },
+  { value: "Live", label: "Coordination workspace" },
+  { value: "Smart", label: "Volunteer matching" },
+  { value: "Shared", label: "NGO visibility" },
 ];
 
 const liveStats = [
   {
-    value: 500,
-    suffix: "+",
-    label: "Tasks Solved",
+    value: "Live",
+    suffix: "",
+    label: "Task visibility",
     icon: "\u2714",
   },
   {
-    value: 120,
-    suffix: "+",
-    label: "Active Volunteers",
+    value: "Clear",
+    suffix: "",
+    label: "Volunteer flow",
     icon: "\uD83D\uDC65",
   },
   {
-    value: 50,
-    suffix: "+",
-    label: "Communities Helped",
+    value: "Secure",
+    suffix: "",
+    label: "Team coordination",
     icon: "\uD83C\uDF0D",
   },
 ];
 
 const testimonials = [
   {
-    quote: "SevaLink helped us find volunteers instantly.",
-    author: "NGO Team",
+    quote: "Clear task intake keeps the right information visible from the start.",
+    author: "Structured reporting",
   },
   {
-    quote: "I was able to help people using my skills easily.",
-    author: "Volunteer",
+    quote: "Volunteer workflows should surface what needs action now, not bury it.",
+    author: "Action-first volunteer UX",
   },
   {
-    quote: "My problem was solved quickly.",
-    author: "User",
+    quote: "Admin dashboards work better when assignment decisions stay readable under pressure.",
+    author: "Operational clarity",
   },
 ];
 
@@ -200,6 +200,10 @@ function CountUpStat({ item, index }) {
   const inView = useInView(statRef, { once: true, amount: 0.45 });
 
   useEffect(() => {
+    if (typeof item.value !== "number") {
+      return undefined;
+    }
+
     if (inView && !hasAnimated) {
       setHasAnimated(true);
       motionValue.set(item.value);
@@ -207,12 +211,17 @@ function CountUpStat({ item, index }) {
   }, [hasAnimated, inView, item.value, motionValue]);
 
   useEffect(() => {
+    if (typeof item.value !== "number") {
+      setDisplayValue(item.value);
+      return undefined;
+    }
+
     const unsubscribe = smoothValue.on("change", (latest) => {
       setDisplayValue(Math.round(latest));
     });
 
     return () => unsubscribe();
-  }, [smoothValue]);
+  }, [item.value, smoothValue]);
 
   return (
     <motion.div
@@ -398,18 +407,18 @@ function Home() {
               </div>
 
               <div className="dashboard-main-metric">
-                <strong>87%</strong>
-                <p>Requests linked to the right responders within the first hour</p>
+                <strong>Live</strong>
+                <p>Tasks, volunteers, and assignments remain visible in one coordinated flow.</p>
               </div>
 
               <div className="dashboard-mini-grid">
                 <div className="dashboard-mini-card">
-                  <span>Urgent requests</span>
-                  <strong>14</strong>
+                  <span>Task intake</span>
+                  <strong>Structured</strong>
                 </div>
                 <div className="dashboard-mini-card">
-                  <span>Helpers ready</span>
-                  <strong>53</strong>
+                  <span>Volunteer view</span>
+                  <strong>Prioritized</strong>
                 </div>
               </div>
 
@@ -418,11 +427,11 @@ function Home() {
                   <motion.span
                     className="dashboard-progress-bar"
                     initial={{ width: 0 }}
-                    animate={{ width: "78%" }}
+                    animate={{ width: "64%" }}
                     transition={{ duration: 1.4, delay: 0.5 }}
                   />
                 </div>
-                <small>Response momentum this week</small>
+                <small>Operational readiness surface</small>
               </div>
             </motion.div>
 
@@ -459,11 +468,11 @@ function Home() {
         viewport={{ once: true, amount: 0.25 }}
       >
         <motion.div className="section-heading" custom={0} variants={revealUp}>
-          <span className="eyebrow">Live Stats</span>
-          <h2>Visible momentum that makes SevaLink feel alive.</h2>
+          <span className="eyebrow">Core Signals</span>
+          <h2>Clear product signals instead of placeholder metrics.</h2>
           <p>
-            A quick pulse check on how the platform is helping people, solving
-            problems, and building trust across communities.
+            These tiles highlight the kind of coordination experience SevaLink
+            is built to deliver without implying fake live production numbers.
           </p>
         </motion.div>
 
@@ -568,11 +577,11 @@ function Home() {
         viewport={{ once: true, amount: 0.25 }}
       >
         <motion.div className="section-heading" custom={0} variants={revealUp}>
-          <span className="eyebrow">Real Voices</span>
-          <h2>Proof that the platform creates real-world trust.</h2>
+          <span className="eyebrow">Design Principles</span>
+          <h2>What the product experience is optimized to do well.</h2>
           <p>
-            Stories from teams, volunteers, and people who received help when
-            they needed it most.
+            Practical product principles that shape how volunteers and NGOs move
+            through the workflow.
           </p>
         </motion.div>
 
@@ -667,8 +676,8 @@ function Home() {
           <div className="about-visual-image" style={{ backgroundImage: `url(${heroImg})` }} />
           <div className="about-overlay-card">
             <span>Connected Reach</span>
-            <strong>12 Cities</strong>
-            <p>Coordinating requests, response teams, and trusted partners across campaigns and urgent needs.</p>
+            <strong>Connected network</strong>
+            <p>Built to coordinate requests, response teams, and trusted partners across changing needs.</p>
           </div>
         </motion.div>
       </motion.section>

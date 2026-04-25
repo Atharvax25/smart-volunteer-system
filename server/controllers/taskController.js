@@ -14,7 +14,7 @@ const {
   notifyNearbyVolunteers,
   notifyVolunteerAssignment,
 } = require("../services/notificationService");
-const { normalizeGeoPoint } = require("../utils/geo");
+const { normalizeGeoPoint, parseMapLink } = require("../utils/geo");
 const { serializeTask } = require("../utils/taskSerializers");
 const { deriveTaskSignals } = require("../utils/taskSignals");
 const { normalizeSkills } = require("../utils/skills");
@@ -27,7 +27,7 @@ async function buildActiveAssignmentMap() {
   const rows = await Task.aggregate([
     {
       $match: {
-        status: { $in: ["pending_confirmation", "assigned"] },
+        status: { $in: ["pending_confirmation", "assigned", "completion_requested"] },
         "assignedVolunteer.volunteer": { $ne: null },
       },
     },
@@ -66,7 +66,7 @@ async function getRankedVolunteersForTask(task) {
 
 function applyAssignment(task, volunteer, matchPayload) {
   task.assignedVolunteer = matchPayload;
-  task.status = "assigned";
+  task.status = "pending_confirmation";
   task.assignedAt = new Date();
   task.assignedTo = volunteer.name;
   task.matchingScore = matchPayload.matchScore || 0;
@@ -89,7 +89,7 @@ function applyAssignment(task, volunteer, matchPayload) {
   }
 
   task.applications.forEach((application) => {
-    if (String(application.volunteer) !== String(volunteer._id) && application.status === "pending") {
+    if (String(application.volunteer) !== String(volunteer._id) && application.status !== "rejected") {
       application.status = "rejected";
     }
   });
@@ -97,14 +97,27 @@ function applyAssignment(task, volunteer, matchPayload) {
 
 async function createTask(req, res) {
   try {
-    const { title, description, location, severity, skills, latitude, longitude, imageLabel } = req.body;
+    const {
+      title,
+      description,
+      location,
+      severity,
+      skills,
+      latitude,
+      longitude,
+      mapLink,
+      imageLabel,
+    } = req.body;
 
     if (!title || !description || !location) {
       return res.status(400).json({ message: "Title, description, and location are required" });
     }
 
     const normalizedSkills = normalizeSkills(skills);
-    const geoLocation = normalizeGeoPoint(latitude, longitude) || { lat: null, lng: null };
+    const normalizedMapLink = String(mapLink || "").trim();
+    const geoLocation =
+      normalizeGeoPoint(latitude, longitude) ||
+      parseMapLink(normalizedMapLink) || { lat: null, lng: null };
     const signals = deriveTaskSignals({
       title,
       description,
@@ -118,6 +131,7 @@ async function createTask(req, res) {
       title: title.trim(),
       description: description.trim(),
       location: location.trim(),
+      mapLink: normalizedMapLink,
       geoLocation,
       severity: signals.severity,
       urgencyScore: signals.urgencyScore,
@@ -164,7 +178,7 @@ async function getTasks(req, res) {
     const tasks = await Task.find(filter)
       .sort({ createdAt: -1 })
       .select(
-        "title description location geoLocation severity urgencyScore category imageUrl imageTag imageTags escalationReason skills status reporterName createdAt sharedVisibility"
+        "title description location mapLink geoLocation severity urgencyScore category imageUrl imageTag imageTags escalationReason skills status reporterName createdAt sharedVisibility"
       );
 
     return res.json(tasks.map((task) => serializeTask(task)));
@@ -177,7 +191,7 @@ async function getVolunteerDashboard(req, res) {
   try {
     const volunteerId = req.user.id;
 
-    const [openTasks, pendingConfirmationTasks, assignedTasks, completedTasks] = await Promise.all([
+    const [openTasks, pendingConfirmationTasks, assignedTasks, completionRequestedTasks, completedTasks] = await Promise.all([
       Task.find({ status: "open", sharedVisibility: true }).sort({ createdAt: -1 }),
       Task.find({
         status: "pending_confirmation",
@@ -185,6 +199,9 @@ async function getVolunteerDashboard(req, res) {
       }).sort({ assignedAt: -1 }),
       Task.find({ status: "assigned", "assignedVolunteer.volunteer": volunteerId }).sort({
         assignedAt: -1,
+      }),
+      Task.find({ status: "completion_requested", "assignedVolunteer.volunteer": volunteerId }).sort({
+        completionRequestedAt: -1,
       }),
       Task.find({ status: "completed", "assignedVolunteer.volunteer": volunteerId }).sort({
         completedAt: -1,
@@ -197,6 +214,9 @@ async function getVolunteerDashboard(req, res) {
         serializeTask(task, volunteerId)
       ),
       assignedTasks: assignedTasks.map((task) => serializeTask(task, volunteerId)),
+      completionRequestedTasks: completionRequestedTasks.map((task) =>
+        serializeTask(task, volunteerId)
+      ),
       completedTasks: completedTasks.map((task) => serializeTask(task, volunteerId)),
     });
   } catch (error) {
@@ -207,11 +227,12 @@ async function getVolunteerDashboard(req, res) {
 async function getAdminDashboard(req, res) {
   try {
     const ngoId = req.user.id;
-    const [openTasks, pendingConfirmationTasks, assignedTasks, completedTasks, volunteers, sharedTasks, recentNotifications] =
+    const [openTasks, pendingConfirmationTasks, assignedTasks, completionRequestedTasks, completedTasks, volunteers, sharedTasks, recentNotifications] =
       await Promise.all([
         Task.find({ ngoId, status: "open" }).sort({ createdAt: -1 }),
         Task.find({ ngoId, status: "pending_confirmation" }).sort({ assignedAt: -1 }),
         Task.find({ ngoId, status: "assigned" }).sort({ assignedAt: -1 }),
+        Task.find({ ngoId, status: "completion_requested" }).sort({ completionRequestedAt: -1 }),
         Task.find({ ngoId, status: "completed" }).sort({ completedAt: -1 }),
         User.find({ role: "Volunteer" })
           .select(
@@ -228,6 +249,7 @@ async function getAdminDashboard(req, res) {
       ...openTasks,
       ...pendingConfirmationTasks,
       ...assignedTasks,
+      ...completionRequestedTasks,
       ...completedTasks,
     ];
 
@@ -235,6 +257,7 @@ async function getAdminDashboard(req, res) {
       openTasks: openTasks.map((task) => serializeTask(task)),
       pendingConfirmationTasks: pendingConfirmationTasks.map((task) => serializeTask(task)),
       assignedTasks: assignedTasks.map((task) => serializeTask(task)),
+      completionRequestedTasks: completionRequestedTasks.map((task) => serializeTask(task)),
       completedTasks: completedTasks.map((task) => serializeTask(task)),
       sharedTasks: sharedTasks.map((task) => serializeTask(task)),
       volunteers,
@@ -276,9 +299,122 @@ async function getMatchedVolunteers(req, res) {
 }
 
 async function applyForTask(req, res) {
-  return res.status(403).json({
-    message: "Volunteer self-application is disabled. Admins must assign tasks manually.",
-  });
+  try {
+    const volunteerId = req.user.id;
+    const [task, volunteer] = await Promise.all([
+      Task.findById(getTaskIdFromRequest(req)),
+      User.findOne({ _id: volunteerId, role: "Volunteer" }).select(
+        "name email skills location availability availabilityScore geoLocation rating points badges tasksCompleted notificationsEnabled"
+      ),
+    ]);
+
+    if (!task) {
+      return res.status(404).json({ message: "Task not found" });
+    }
+
+    if (!volunteer) {
+      return res.status(404).json({ message: "Volunteer not found" });
+    }
+
+    if (task.status !== "open") {
+      return res.status(400).json({ message: "This task is no longer open for volunteer acceptance" });
+    }
+
+    if (task.sharedVisibility === false) {
+      return res.status(403).json({ message: "This task is not open to the volunteer network" });
+    }
+
+    const existingApplication = task.applications.find(
+      (application) => String(application.volunteer) === String(volunteerId)
+    );
+
+    if (existingApplication) {
+      return res.status(409).json({ message: "You have already accepted this task" });
+    }
+
+    task.applications.push({
+      volunteer: volunteer._id,
+      volunteerName: volunteer.name,
+      volunteerEmail: volunteer.email,
+      volunteerSkills: volunteer.skills || [],
+      status: "accepted",
+      appliedAt: new Date(),
+    });
+
+    await task.save();
+
+    const ngo = task.ngoId
+      ? await User.findById(task.ngoId).select("email name organizationName")
+      : null;
+
+    await Notification.create({
+      type: "system",
+      recipientEmail: ngo?.email || volunteer.email,
+      recipientName: ngo?.organizationName || ngo?.name || volunteer.name,
+      subject: "Volunteer accepted task",
+      message: `${volunteer.name} accepted the task "${task.title}".`,
+      status: "sent",
+      taskId: task._id,
+      ngoId: task.ngoId,
+      metadata: {
+        volunteerId: String(volunteer._id),
+      },
+    });
+
+    return res.json({
+      message: "Task accepted. The NGO can now review your interest and assign you.",
+      task: serializeTask(task, volunteerId),
+    });
+  } catch (error) {
+    return res.status(500).json({ message: "Unable to accept task right now" });
+  }
+}
+
+async function requestTaskCompletion(req, res) {
+  try {
+    const task = await Task.findById(req.params.id);
+    if (!task) {
+      return res.status(404).json({ message: "Task not found" });
+    }
+
+    const isAssignedVolunteer =
+      task.assignedVolunteer && String(task.assignedVolunteer.volunteer) === String(req.user.id);
+
+    if (!isAssignedVolunteer) {
+      return res.status(403).json({ message: "You do not have permission to request completion for this task" });
+    }
+
+    if (task.status !== "assigned") {
+      return res.status(400).json({ message: "Only active assigned tasks can be submitted for admin verification" });
+    }
+
+    const ngo = await User.findById(task.ngoId).select("email name organizationName");
+
+    task.status = "completion_requested";
+    task.completionRequestedAt = new Date();
+    await task.save();
+
+    await Notification.create({
+      type: "system",
+      recipientEmail: ngo?.email || req.user.email || "noreply@sevalink.local",
+      recipientName: ngo?.organizationName || ngo?.name || "",
+      subject: "Volunteer requested task completion review",
+      message: `${task.assignedVolunteer?.volunteerName || "A volunteer"} marked "${task.title}" as completed and requested admin verification.`,
+      status: "sent",
+      taskId: task._id,
+      ngoId: task.ngoId,
+      metadata: {
+        volunteerId: String(req.user.id),
+      },
+    });
+
+    return res.json({
+      message: "Completion request sent to the admin for verification.",
+      task: serializeTask(task, req.user.id),
+    });
+  } catch (error) {
+    return res.status(500).json({ message: "Unable to request task completion" });
+  }
 }
 
 async function runTaskMatching(req, res) {
@@ -402,6 +538,12 @@ async function completeTask(req, res) {
       return res.status(403).json({ message: "You do not have permission to complete this task" });
     }
 
+    if (req.user.role === "Volunteer") {
+      return res.status(403).json({
+        message: "Volunteers must submit completion for admin verification first.",
+      });
+    }
+
     task.status = "completed";
     task.completedAt = new Date();
     await task.save();
@@ -434,5 +576,6 @@ module.exports = {
   getTasks,
   getVolunteerDashboard,
   optimizeAssignment,
+  requestTaskCompletion,
   runTaskMatching,
 };

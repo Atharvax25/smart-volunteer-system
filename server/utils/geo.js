@@ -22,6 +22,36 @@ function normalizeGeoPoint(latInput, lngInput) {
   return { lat, lng };
 }
 
+function parseMapLink(mapLink) {
+  if (!mapLink || typeof mapLink !== "string") {
+    return null;
+  }
+
+  const decodedLink = decodeURIComponent(mapLink.trim());
+  const patterns = [
+    /@(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)/,
+    /[?&]q=(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)/,
+    /[?&]ll=(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)/,
+    /[?&]destination=(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)/,
+    /[?&]query=(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)/,
+    /!3d(-?\d+(?:\.\d+)?)!4d(-?\d+(?:\.\d+)?)/,
+  ];
+
+  for (const pattern of patterns) {
+    const match = decodedLink.match(pattern);
+    if (!match) {
+      continue;
+    }
+
+    const point = normalizeGeoPoint(match[1], match[2]);
+    if (point) {
+      return point;
+    }
+  }
+
+  return null;
+}
+
 function haversineDistanceKm(pointA, pointB) {
   if (!pointA || !pointB) {
     return null;
@@ -74,5 +104,6 @@ module.exports = {
   getDistanceScore,
   haversineDistanceKm,
   normalizeGeoPoint,
+  parseMapLink,
   toNumber,
 };

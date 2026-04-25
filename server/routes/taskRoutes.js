@@ -11,6 +11,7 @@ const {
   optimizeAssignment,
   confirmAssignedTask,
   completeTask,
+  requestTaskCompletion,
 } = require("../controllers/taskController");
 const { requireAuth, requireRole } = require("../middleware/authMiddleware");
 const { upload } = require("../middleware/uploadMiddleware");
@@ -28,6 +29,7 @@ router.post("/:id/optimize-assignment", requireAuth, requireRole("NGO"), optimiz
 router.patch("/:id/assign", requireAuth, requireRole("NGO"), assignTask);
 router.put("/assign/:taskId", requireAuth, requireRole("NGO"), assignTask);
 router.patch("/:id/confirm", requireAuth, requireRole("Volunteer"), confirmAssignedTask);
+router.patch("/:id/request-complete", requireAuth, requireRole("Volunteer"), requestTaskCompletion);
 router.patch("/:id/complete", requireAuth, completeTask);
 
 module.exports = router;

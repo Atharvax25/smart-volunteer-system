@@ -88,6 +88,7 @@ function Admin() {
     openTasks: [],
     pendingConfirmationTasks: [],
     assignedTasks: [],
+    completionRequestedTasks: [],
     completedTasks: [],
     volunteers: [],
     sharedTasks: [],
@@ -112,8 +113,11 @@ function Admin() {
   const [matchLoadingTaskId, setMatchLoadingTaskId] = useState("");
 
   const fetchDashboard = useCallback(
-    async (token = session?.token) => {
-      setLoading(true);
+    async (token = session?.token, options = {}) => {
+      const { silent = false } = options;
+      if (!silent) {
+        setLoading(true);
+      }
 
       try {
         const [dashboardResponse, predictionResponse] = await Promise.all([
@@ -140,6 +144,7 @@ function Admin() {
           openTasks: dashboardData.openTasks || [],
           pendingConfirmationTasks: dashboardData.pendingConfirmationTasks || [],
           assignedTasks: dashboardData.assignedTasks || [],
+          completionRequestedTasks: dashboardData.completionRequestedTasks || [],
           completedTasks: dashboardData.completedTasks || [],
           volunteers: dashboardData.volunteers || [],
           sharedTasks: dashboardData.sharedTasks || [],
@@ -158,9 +163,13 @@ function Admin() {
           setPredictionReport({ predictions: dashboardData.predictions || [] });
         }
       } catch (error) {
-        toast.error(error.message || "Unable to load admin dashboard");
+        if (!silent) {
+          toast.error(error.message || "Unable to load admin dashboard");
+        }
       } finally {
-        setLoading(false);
+        if (!silent) {
+          setLoading(false);
+        }
       }
     },
     [session?.token]
@@ -181,6 +190,27 @@ function Admin() {
       setLoading(false);
     }
   }, [fetchDashboard]);
+
+  useEffect(() => {
+    if (!session?.token || session.user.role !== "NGO") {
+      return undefined;
+    }
+
+    const interval = window.setInterval(() => {
+      fetchDashboard(session.token, { silent: true });
+    }, 10000);
+
+    const handleFocus = () => {
+      fetchDashboard(session.token, { silent: true });
+    };
+
+    window.addEventListener("focus", handleFocus);
+
+    return () => {
+      window.clearInterval(interval);
+      window.removeEventListener("focus", handleFocus);
+    };
+  }, [fetchDashboard, session]);
 
   const handleAdminAction = async (taskId, urlSuffix, method, body, successMessage, actionId) => {
     if (!session?.token) {
@@ -228,10 +258,16 @@ function Admin() {
     [dashboard.openTasks, filter, search]
   );
 
+  const tasksWithAcceptances = useMemo(
+    () => dashboard.openTasks.filter((task) => (task.applications || []).length > 0),
+    [dashboard.openTasks]
+  );
+
   const ownedTaskCount =
     dashboard.openTasks.length +
     dashboard.pendingConfirmationTasks.length +
     dashboard.assignedTasks.length +
+    dashboard.completionRequestedTasks.length +
     dashboard.completedTasks.length;
 
   const volunteerStats = useMemo(() => {
@@ -281,7 +317,7 @@ function Admin() {
     {
       label: "Total tasks",
       value: ownedTaskCount,
-      detail: `${dashboard.openTasks.length} open and ${dashboard.assignedTasks.length} active`,
+      detail: `${dashboard.openTasks.length} open and ${dashboard.assignedTasks.length + dashboard.completionRequestedTasks.length} active`,
       accent: "teal",
     },
     {
@@ -389,6 +425,13 @@ function Admin() {
       subtitle: "Tasks that are actively assigned",
       items: dashboard.assignedTasks,
       empty: "No active assigned tasks right now.",
+    },
+    {
+      title: "Completion review",
+      subtitle: "Volunteer submissions waiting for admin verification",
+      items: dashboard.completionRequestedTasks,
+      empty: "No volunteer completion requests waiting right now.",
+      showAdminComplete: true,
     },
     {
       title: "Completed",
@@ -589,6 +632,41 @@ function Admin() {
       </div>
 
       <PredictionBanner predictions={predictionReport.predictions} />
+
+      {tasksWithAcceptances.length ? (
+        <motion.section
+          className="admin-panel"
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.2 }}
+          variants={sectionReveal}
+        >
+          <div className="admin-panel-head">
+            <div>
+              <span className="admin-eyebrow">Volunteer activity</span>
+              <h3>Volunteer acceptances waiting review</h3>
+            </div>
+            <p>New volunteer interest appears here so you can assign faster.</p>
+          </div>
+
+          <div className="admin-simple-stack">
+            {tasksWithAcceptances.map((task) => (
+              <article key={`acceptance-${task._id}`} className="admin-simple-card">
+                <div>
+                  <strong>{task.title}</strong>
+                  <p>
+                    {(task.applications || []).length} volunteer
+                    {(task.applications || []).length === 1 ? "" : "s"} accepted this task
+                  </p>
+                </div>
+                <span className={`task-severity severity-${task.severity || "medium"}`}>
+                  review now
+                </span>
+              </article>
+            ))}
+          </div>
+        </motion.section>
+      ) : null}
 
       <div className="admin-main-grid">
         <motion.section
@@ -797,10 +875,15 @@ function Admin() {
                   <span className="admin-task-chip">
                     {task.skills?.length ? task.skills.join(", ") : "No specific skills"}
                   </span>
-                  {task.geoLocation?.lat !== null && task.geoLocation?.lng !== null ? (
-                    <span className="admin-task-chip">
-                      {task.geoLocation.lat}, {task.geoLocation.lng}
-                    </span>
+                  {task.mapLink ? (
+                    <a
+                      href={task.mapLink}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="admin-task-chip admin-task-map-link"
+                    >
+                      Open map location
+                    </a>
                   ) : null}
                 </div>
 
@@ -911,7 +994,7 @@ function Admin() {
 
                 <div className="admin-task-columns">
                   <div className="admin-subpanel">
-                    <h4>Applications</h4>
+                    <h4>Volunteer acceptances</h4>
                     {task.applications?.length ? (
                       task.applications.slice(0, 3).map((application) => (
                         <div
@@ -921,6 +1004,7 @@ function Admin() {
                           <strong>{application.volunteerName}</strong>
                           <p>{application.volunteerEmail}</p>
                           <p>{application.volunteerSkills?.join(", ") || "None listed"}</p>
+                          <p>Status: {application.status}</p>
                           <button
                             type="button"
                             className="task-action-btn"
@@ -1033,7 +1117,25 @@ function Admin() {
                       <strong>{task.title}</strong>
                       <p>{task.assignedVolunteer?.volunteerName || task.location}</p>
                     </div>
-                    {column.title === "In progress" ? (
+                    {column.showAdminComplete ? (
+                      <button
+                        type="button"
+                        className="task-action-btn task-complete-btn"
+                        disabled={actionKey === `${task._id}-complete`}
+                        onClick={() =>
+                          handleAdminAction(
+                            task._id,
+                            "complete",
+                            "PATCH",
+                            null,
+                            "Task verified and marked as completed",
+                            `${task._id}-complete`
+                          )
+                        }
+                      >
+                        {actionKey === `${task._id}-complete` ? "Updating..." : "Verify & Complete"}
+                      </button>
+                    ) : column.title === "In progress" ? (
                       <button
                         type="button"
                         className="task-action-btn task-complete-btn"

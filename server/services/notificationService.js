@@ -123,8 +123,27 @@ async function notifyNearbyVolunteers(task, rankedMatches) {
   );
 }
 
+async function sendPasswordResetOtp(user, otpCode) {
+  const subject = "Your SevaLink password reset code";
+  const message = [
+    `Hello ${user.name},`,
+    "",
+    "We received a request to reset your SevaLink password.",
+    `Use this one-time code to continue: ${otpCode}`,
+    "",
+    "This code expires in 10 minutes.",
+    "If you did not request this change, you can ignore this message.",
+  ].join("\n");
+
+  return sendEmail(user.email, subject, message, {
+    recipientName: user.name,
+    type: "system",
+  });
+}
+
 module.exports = {
   notifyNearbyVolunteers,
   notifyVolunteerAssignment,
+  sendPasswordResetOtp,
   sendEmail,
 };

@@ -85,7 +85,7 @@ function TaskHeatmap({ points = [] }) {
         </div>
       ) : (
         <p className="admin-empty-copy">
-          Add latitude and longitude to tasks to populate the heatmap.
+          Add a direct map link while creating tasks to populate the heatmap automatically.
         </p>
       )}
     </motion.section>

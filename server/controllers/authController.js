@@ -1,7 +1,19 @@
+const crypto = require("crypto");
 const User = require("../models/User");
+const { sendPasswordResetOtp } = require("../services/notificationService");
 const { normalizeGeoPoint, toNumber } = require("../utils/geo");
 const { normalizeSkills } = require("../utils/skills");
 const { hashPassword, verifyPassword, signToken } = require("../utils/auth");
+
+const PASSWORD_RESET_OTP_TTL_MS = 1000 * 60 * 10;
+
+function hashOtpCode(otpCode) {
+  return crypto.createHash("sha256").update(String(otpCode)).digest("hex");
+}
+
+function createOtpCode() {
+  return String(Math.floor(100000 + Math.random() * 900000));
+}
 
 function sanitizeUser(user) {
   return {
@@ -132,9 +144,82 @@ async function me(req, res) {
   }
 }
 
+async function requestPasswordReset(req, res) {
+  try {
+    const normalizedEmail = String(req.body.email || "")
+      .toLowerCase()
+      .trim();
+
+    if (!normalizedEmail) {
+      return res.status(400).json({ message: "Email is required" });
+    }
+
+    const user = await User.findOne({ email: normalizedEmail });
+    if (!user) {
+      return res.json({
+        message: "If that email is registered, a reset code has been sent.",
+      });
+    }
+
+    const otpCode = createOtpCode();
+    user.passwordResetOtpHash = hashOtpCode(otpCode);
+    user.passwordResetOtpExpiresAt = new Date(Date.now() + PASSWORD_RESET_OTP_TTL_MS);
+    await user.save();
+
+    await sendPasswordResetOtp(user, otpCode);
+
+    return res.json({
+      message: "If that email is registered, a reset code has been sent.",
+    });
+  } catch (error) {
+    return res.status(500).json({ message: "Unable to send reset code" });
+  }
+}
+
+async function resetPassword(req, res) {
+  try {
+    const normalizedEmail = String(req.body.email || "")
+      .toLowerCase()
+      .trim();
+    const otpCode = String(req.body.otp || "").trim();
+    const password = String(req.body.password || "");
+
+    if (!normalizedEmail || !otpCode || !password) {
+      return res.status(400).json({ message: "Email, code, and new password are required" });
+    }
+
+    if (password.length < 6) {
+      return res.status(400).json({ message: "Password must be at least 6 characters" });
+    }
+
+    const user = await User.findOne({ email: normalizedEmail });
+    if (!user || !user.passwordResetOtpHash || !user.passwordResetOtpExpiresAt) {
+      return res.status(400).json({ message: "Invalid or expired reset code" });
+    }
+
+    const isExpired = new Date(user.passwordResetOtpExpiresAt).getTime() < Date.now();
+    const otpMatches = user.passwordResetOtpHash === hashOtpCode(otpCode);
+
+    if (isExpired || !otpMatches) {
+      return res.status(400).json({ message: "Invalid or expired reset code" });
+    }
+
+    user.passwordHash = hashPassword(password);
+    user.passwordResetOtpHash = "";
+    user.passwordResetOtpExpiresAt = null;
+    await user.save();
+
+    return res.json({ message: "Password reset successful. You can now log in." });
+  } catch (error) {
+    return res.status(500).json({ message: "Unable to reset password" });
+  }
+}
+
 module.exports = {
   register,
   login,
   me,
+  requestPasswordReset,
+  resetPassword,
   normalizeSkills,
 };

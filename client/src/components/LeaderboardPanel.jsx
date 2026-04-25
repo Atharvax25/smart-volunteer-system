@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 function LeaderboardPanel({ leaderboard = [] }) {
   return (
     <motion.section
-      className="admin-panel"
+      className="admin-panel leaderboard-panel"
       initial={{ opacity: 0, y: 22 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 0.2 }}

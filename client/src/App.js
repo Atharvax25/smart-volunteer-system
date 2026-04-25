@@ -6,8 +6,6 @@ import {
   Navigate,
   Route,
   Routes,
-  useLocation,
-  useNavigate,
 } from "react-router-dom";
 import { useEffect, useState } from "react";
 
@@ -20,25 +18,16 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 function AppShell() {
-  const location = useLocation();
-  const navigate = useNavigate();
-  const [showIntro, setShowIntro] = useState(() => location.pathname === "/");
+  const [showIntro, setShowIntro] = useState(true);
   const [scroll, setScroll] = useState(0);
 
   useEffect(() => {
-    if (location.pathname !== "/") {
-      setShowIntro(false);
-      return undefined;
-    }
-
-    setShowIntro(true);
     const timer = window.setTimeout(() => {
       setShowIntro(false);
-      navigate("/home", { replace: true });
     }, 6000);
 
     return () => window.clearTimeout(timer);
-  }, [location.pathname, navigate]);
+  }, []);
 
   useEffect(() => {
     if (showIntro) {

@@ -48,7 +48,7 @@ async function getHeatmap(req, res) {
   try {
     const tasks = await Task.find({
       ngoId: req.user.id,
-      status: { $in: ["open", "pending_confirmation", "assigned", "completed"] },
+      status: { $in: ["open", "pending_confirmation", "assigned", "completion_requested", "completed"] },
     }).sort({ createdAt: -1 });
 
     return res.json({
