@@ -1,0 +1,36 @@
+<svg width="220" height="220" viewBox="0 0 220 220" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="navyStroke" x1="31" y1="111" x2="110" y2="197" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#31327D"/>
+      <stop offset="1" stop-color="#20245C"/>
+    </linearGradient>
+    <linearGradient id="goldStroke" x1="110" y1="42" x2="186" y2="165" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#E1BE67"/>
+      <stop offset="1" stop-color="#C89A3D"/>
+    </linearGradient>
+    <linearGradient id="heartFill" x1="67" y1="77" x2="154" y2="147" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F9F3E3"/>
+      <stop offset="1" stop-color="#E7D5A0"/>
+    </linearGradient>
+  </defs>
+
+  <circle cx="110" cy="110" r="95" stroke="#2B2E73" stroke-width="10"/>
+  <path d="M59 47C79 35 95 31 110 31C126 31 143 35 161 46" stroke="#D4AA53" stroke-width="8" stroke-linecap="round"/>
+
+  <circle cx="63" cy="52" r="14" fill="#31327D"/>
+  <circle cx="157" cy="52" r="14" fill="#D4AA53"/>
+
+  <path d="M57 175C34 160 20 137 18 108" stroke="#2B2E73" stroke-width="10" stroke-linecap="round"/>
+  <path d="M163 176C187 161 201 137 202 108" stroke="#D4AA53" stroke-width="10" stroke-linecap="round"/>
+
+  <path d="M95 81C103 70 116 68 128 72C144 78 149 94 145 108C141 124 126 135 110 147C94 135 79 124 75 108C71 94 79 79 95 74C105 71 114 73 121 80" fill="url(#heartFill)" stroke="#C5A24E" stroke-width="5" stroke-linejoin="round"/>
+
+  <path d="M47 142C57 146 66 152 75 163C81 170 87 177 97 182C87 183 77 182 68 178C57 173 48 165 41 156C36 150 33 145 31 139" fill="none" stroke="url(#navyStroke)" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M173 142C163 146 154 152 145 163C139 170 133 177 123 182C133 183 143 182 152 178C163 173 172 165 179 156C184 150 187 145 189 139" fill="none" stroke="url(#goldStroke)" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <path d="M74 92C83 77 95 69 107 69C121 69 133 77 142 92C131 89 123 89 115 92C109 94 104 99 100 105C95 99 90 95 84 93C80 92 77 92 74 92Z" fill="#2C2F75"/>
+  <path d="M147 92C138 76 126 68 113 68C101 68 91 75 82 88C93 87 102 89 110 95C117 100 123 108 128 117C134 107 140 98 147 94C149 93 151 92 147 92Z" fill="#D4AA53"/>
+
+  <path d="M73 93C85 89 95 92 104 100C111 107 115 116 118 126" stroke="#2B2E73" stroke-width="10" stroke-linecap="round"/>
+  <path d="M147 92C136 90 126 94 117 103C111 110 107 118 103 128" stroke="#D4AA53" stroke-width="10" stroke-linecap="round"/>
+</svg>

@@ -2,9 +2,12 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import "./App.css";
-
-const API_BASE_URL = "http://localhost:5000/api";
-const STORAGE_KEY = "sevalink-auth";
+import {
+  API_BASE_URL,
+  clearStoredSession,
+  getStoredSession,
+  setStoredSession,
+} from "./utils/sevalink";
 
 const initialState = {
   login: {
@@ -16,7 +19,11 @@ const initialState = {
     email: "",
     password: "",
     role: "Volunteer",
+    organizationName: "",
     skills: "",
+    availabilityScore: "0.75",
+    latitude: "",
+    longitude: "",
   },
 };
 
@@ -28,9 +35,9 @@ function Auth() {
   const [session, setSession] = useState(null);
 
   useEffect(() => {
-    const storedSession = localStorage.getItem(STORAGE_KEY);
+    const storedSession = getStoredSession();
     if (storedSession) {
-      setSession(JSON.parse(storedSession));
+      setSession(storedSession);
     }
   }, []);
 
@@ -40,7 +47,7 @@ function Auth() {
         badge: "Welcome back",
         title: "Log in to continue your impact journey",
         subtitle:
-          "Volunteers can apply for matching tasks while admins can report, match, and assign work.",
+          "Volunteers can apply for matching tasks while NGOs can report, predict, match, assign, and track impact in one flow.",
         buttonText: "Login",
         endpoint: "login",
       },
@@ -48,7 +55,7 @@ function Auth() {
         badge: "Join SevaLink",
         title: "Create your account and start contributing",
         subtitle:
-          "Volunteer skills are now captured during registration so future task matching can work accurately.",
+          "Profiles now capture availability, geo-coordinates, organization details, and volunteer skills for smarter matching and multi-NGO coordination.",
         buttonText: "Register",
         endpoint: "register",
       },
@@ -85,7 +92,26 @@ function Auth() {
         body: JSON.stringify(payload),
       });
 
-      const data = await response.json();
+      const responseText = await response.text();
+      const contentType = response.headers.get("content-type") || "";
+      let data = null;
+
+      if (contentType.includes("application/json")) {
+        data = responseText ? JSON.parse(responseText) : {};
+      } else if (responseText.trim().startsWith("<!DOCTYPE") || responseText.trim().startsWith("<html")) {
+        throw new Error(
+          "The frontend received an HTML page instead of the API response. Restart both the client and server, then try again."
+        );
+      } else if (responseText) {
+        try {
+          data = JSON.parse(responseText);
+        } catch {
+          throw new Error(responseText);
+        }
+      } else {
+        data = {};
+      }
+
       if (!response.ok) {
         throw new Error(data.message || "Authentication failed");
       }
@@ -95,19 +121,24 @@ function Auth() {
         user: data.user,
       };
 
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(nextSession));
+      setStoredSession(nextSession);
       setSession(nextSession);
       toast.success(data.message || `${content[activeTab].buttonText} successful`);
       goToRoleHome(data.user);
     } catch (error) {
-      toast.error(error.message || "Something went wrong");
+      const message =
+        error instanceof TypeError
+          ? "Unable to reach the server. Start the backend on port 5000 and try again."
+          : error.message || "Something went wrong";
+
+      toast.error(message);
     } finally {
       setSubmitting(false);
     }
   };
 
   const handleLogout = () => {
-    localStorage.removeItem(STORAGE_KEY);
+    clearStoredSession();
     setSession(null);
     toast.success("Logged out successfully");
   };
@@ -122,12 +153,12 @@ function Auth() {
 
           <div className="auth-highlights">
             <div className="auth-highlight-card">
-              <strong>Volunteer-ready matching</strong>
-              <span>Store volunteer skills once and reuse them for task recommendations and assignments.</span>
+              <strong>Geo-aware matching</strong>
+              <span>Volunteer availability, performance, skills, and distance all feed into smarter assignments.</span>
             </div>
             <div className="auth-highlight-card">
-              <strong>Admin review flow</strong>
-              <span>Volunteers can apply first, and admins still control the final assignment decision.</span>
+              <strong>Multi-NGO readiness</strong>
+              <span>Organizations can publish visible tasks while still keeping their own admin dashboard scoped and clean.</span>
             </div>
           </div>
         </div>
@@ -141,8 +172,17 @@ function Auth() {
               </p>
               <p>{session.user.email}</p>
               <p>Role: {session.user.role}</p>
+              {session.user.organizationName ? (
+                <p>Organization: {session.user.organizationName}</p>
+              ) : null}
               {session.user.role === "Volunteer" ? (
-                <p>Skills: {(session.user.skills || []).join(", ") || "Not added yet"}</p>
+                <>
+                  <p>Skills: {(session.user.skills || []).join(", ") || "Not added yet"}</p>
+                  <p>
+                    Points: {session.user.points || 0} · Completed: {session.user.tasksCompleted || 0}
+                  </p>
+                  <p>Badges: {(session.user.badges || []).join(", ") || "No badges yet"}</p>
+                </>
               ) : null}
               <div className="auth-session-actions">
                 <button
@@ -251,17 +291,73 @@ function Auth() {
                     </select>
                   </label>
 
+                  <label>
+                    Organization Name
+                    <input
+                      type="text"
+                      placeholder="Seva foundation, local NGO, mutual aid group..."
+                      value={formData.register.organizationName}
+                      onChange={(event) =>
+                        handleChange("register", "organizationName", event.target.value)
+                      }
+                    />
+                  </label>
+
                   {formData.register.role === "Volunteer" ? (
-                    <label>
-                      Volunteer Skills
-                      <textarea
-                        className="auth-skills-input"
-                        placeholder="Example: medical, teaching, logistics"
-                        value={formData.register.skills}
-                        onChange={(event) => handleChange("register", "skills", event.target.value)}
-                        required
-                      ></textarea>
-                    </label>
+                    <>
+                      <label>
+                        Volunteer Skills
+                        <textarea
+                          className="auth-skills-input"
+                          placeholder="Example: medical, teaching, logistics"
+                          value={formData.register.skills}
+                          onChange={(event) => handleChange("register", "skills", event.target.value)}
+                          required
+                        ></textarea>
+                      </label>
+
+                      <label>
+                        Availability
+                        <select
+                          value={formData.register.availabilityScore}
+                          onChange={(event) =>
+                            handleChange("register", "availabilityScore", event.target.value)
+                          }
+                        >
+                          <option value="0.35">Occasional</option>
+                          <option value="0.65">Moderate</option>
+                          <option value="0.95">Highly available</option>
+                        </select>
+                      </label>
+
+                      <div className="auth-coordinates-grid">
+                        <label>
+                          Latitude
+                          <input
+                            type="number"
+                            step="any"
+                            placeholder="19.0760"
+                            value={formData.register.latitude}
+                            onChange={(event) =>
+                              handleChange("register", "latitude", event.target.value)
+                            }
+                          />
+                        </label>
+
+                        <label>
+                          Longitude
+                          <input
+                            type="number"
+                            step="any"
+                            placeholder="72.8777"
+                            value={formData.register.longitude}
+                            onChange={(event) =>
+                              handleChange("register", "longitude", event.target.value)
+                            }
+                          />
+                        </label>
+                      </div>
+                    </>
                   ) : null}
 
                   <button type="submit" className="auth-submit" disabled={submitting}>
@@ -273,7 +369,7 @@ function Auth() {
           )}
 
           <p className="auth-footnote">
-            Volunteers now register with skills, and those skills feed the admin matching flow for open tasks.
+            SevaLink now supports smarter matching, leaderboard points, need prediction, and multi-NGO task visibility.
           </p>
 
           <Link to="/" className="auth-back-link">

@@ -1,0 +1,43 @@
+<svg width="540" height="640" viewBox="0 0 540 640" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="fullNavyStroke" x1="84" y1="270" x2="247" y2="460" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#31327D"/>
+      <stop offset="1" stop-color="#20245C"/>
+    </linearGradient>
+    <linearGradient id="fullGoldStroke" x1="266" y1="93" x2="454" y2="385" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#E4C36B"/>
+      <stop offset="1" stop-color="#C89A3D"/>
+    </linearGradient>
+    <linearGradient id="fullHeartFill" x1="164" y1="157" x2="380" y2="314" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FCF7EB"/>
+      <stop offset="1" stop-color="#E6D099"/>
+    </linearGradient>
+    <linearGradient id="wordmark" x1="60" y1="500" x2="457" y2="500" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#242965"/>
+      <stop offset="1" stop-color="#31327D"/>
+    </linearGradient>
+  </defs>
+
+  <circle cx="270" cy="215" r="182" stroke="#2B2E73" stroke-width="16"/>
+  <path d="M158 92C192 71 228 60 270 60C311 60 347 71 382 91" stroke="#D4AA53" stroke-width="12" stroke-linecap="round"/>
+
+  <circle cx="157" cy="94" r="27" fill="#31327D"/>
+  <circle cx="382" cy="94" r="27" fill="#D4AA53"/>
+
+  <path d="M143 343C99 332 63 302 48 257" stroke="#2B2E73" stroke-width="15" stroke-linecap="round"/>
+  <path d="M397 343C441 331 476 301 491 256" stroke="#D4AA53" stroke-width="15" stroke-linecap="round"/>
+
+  <path d="M228 154C247 132 281 127 308 139C341 153 354 187 346 219C338 252 307 278 270 307C233 278 201 252 193 219C185 186 199 154 232 140C257 129 280 135 296 155" fill="url(#fullHeartFill)" stroke="#C5A24E" stroke-width="8" stroke-linejoin="round"/>
+
+  <path d="M95 278C115 287 134 299 152 322C168 342 183 357 203 366C177 373 149 373 123 363C92 352 66 331 50 304C43 292 38 281 35 269" fill="none" stroke="url(#fullNavyStroke)" stroke-width="18" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M445 278C425 287 406 299 388 322C372 342 357 357 337 366C363 373 391 373 417 363C448 352 474 331 490 304C497 292 502 281 505 269" fill="none" stroke="url(#fullGoldStroke)" stroke-width="18" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <path d="M172 173C188 148 209 134 234 134C260 134 283 149 300 173C278 166 259 166 243 174C231 180 222 189 215 202C206 190 196 181 183 176C179 174 175 173 172 173Z" fill="#2C2F75"/>
+  <path d="M370 173C353 148 330 133 304 133C278 133 257 145 238 168C260 166 281 172 298 186C311 197 321 212 329 228C338 212 348 198 361 187C365 183 368 179 370 173Z" fill="#D4AA53"/>
+
+  <path d="M171 175C195 166 220 173 241 192C259 207 270 229 278 251" stroke="#2B2E73" stroke-width="18" stroke-linecap="round"/>
+  <path d="M369 174C344 168 321 177 301 195C285 210 273 230 262 255" stroke="#D4AA53" stroke-width="18" stroke-linecap="round"/>
+
+  <text x="270" y="515" text-anchor="middle" fill="url(#wordmark)" font-family="Poppins, Montserrat, Arial, sans-serif" font-size="78" font-weight="800" letter-spacing="3">SEVALINK</text>
+  <text x="270" y="572" text-anchor="middle" fill="#242965" font-family="Georgia, Times New Roman, serif" font-size="34" font-weight="700" letter-spacing="1.4">CONNECT TO THE PEOPLE</text>
+</svg>
