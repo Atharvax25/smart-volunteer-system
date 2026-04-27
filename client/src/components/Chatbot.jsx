@@ -36,6 +36,35 @@ function Chatbot() {
     setIsOpen(false);
   }, [location.pathname]);
 
+  async function postToAssistant(endpoint, nextMessage) {
+    const response = await fetch(endpoint, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ message: nextMessage }),
+    });
+
+    const responseText = await response.text();
+    const contentType = response.headers.get("content-type") || "";
+
+    if (
+      responseText.trim().startsWith("<!DOCTYPE") ||
+      responseText.trim().startsWith("<html")
+    ) {
+      throw new Error("html-response");
+    }
+
+    let data = {};
+    if (contentType.includes("application/json")) {
+      data = responseText ? JSON.parse(responseText) : {};
+    } else if (responseText) {
+      data = JSON.parse(responseText);
+    }
+
+    return { response, data };
+  }
+
   async function sendMessage(prefilledMessage) {
     const nextMessage = String(prefilledMessage ?? message).trim();
 
@@ -53,15 +82,37 @@ function Chatbot() {
     ]);
 
     try {
-      const response = await fetch(`${API_BASE_URL}/chat`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ message: nextMessage }),
-      });
+      const fallbackBases = [
+        API_BASE_URL,
+        "http://localhost:5000/api",
+        "http://127.0.0.1:5000/api",
+      ].filter((value, index, array) => value && array.indexOf(value) === index);
 
-      const data = await response.json();
+      let data = null;
+      let response = null;
+      let lastError = null;
+
+      for (const baseUrl of fallbackBases) {
+        try {
+          const result = await postToAssistant(`${baseUrl}/chat`, nextMessage);
+          response = result.response;
+          data = result.data;
+          lastError = null;
+          break;
+        } catch (error) {
+          lastError = error;
+        }
+      }
+
+      if (!response) {
+        if (lastError?.message === "html-response") {
+          throw new Error(
+            "The assistant endpoint returned an HTML page instead of API JSON. Make sure the backend server on port 5000 is running and the /api/chat route is reachable."
+          );
+        }
+
+        throw new Error("Unable to connect to the SevaLink Assistant.");
+      }
 
       if (!response.ok) {
         throw new Error(data.message || "Unable to reach the SevaLink Assistant.");

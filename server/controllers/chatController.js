@@ -31,6 +31,28 @@ function getGeminiClient() {
   return new GoogleGenerativeAI(apiKey);
 }
 
+function buildFallbackReply(message) {
+  const normalized = String(message || "").toLowerCase();
+
+  if (normalized.includes("feature")) {
+    return "SevaLink helps NGOs create tasks, lets volunteers accept and confirm assignments, shows admin analytics, and includes smart matching, maps, offline-safe task capture, and an in-app assistant.";
+  }
+
+  if (normalized.includes("volunteer") || normalized.includes("help")) {
+    return "You can help by reviewing open opportunities, accepting tasks that match your skills, confirming assigned work quickly, and requesting completion review once the task is done.";
+  }
+
+  if (normalized.includes("task")) {
+    return "NGO users create structured tasks with location, severity, and required skills. Volunteers can review opportunities, accept tasks, confirm assignments, and track work through pending, active, review, and completed stages.";
+  }
+
+  if (normalized.includes("ngo") || normalized.includes("admin")) {
+    return "NGO admins can create tasks, review volunteer applications, assign the best match, track task status, and monitor analytics like predictions, heatmaps, and volunteer performance.";
+  }
+
+  return "I can help with SevaLink questions, volunteer guidance, task workflow explanations, and how the NGO dashboard works.";
+}
+
 exports.chatWithGemini = async (req, res) => {
   try {
     const message = String(req.body?.message || "").trim();
@@ -41,8 +63,9 @@ exports.chatWithGemini = async (req, res) => {
 
     const client = getGeminiClient();
     if (!client) {
-      return res.status(503).json({
-        message: "Gemini is not configured yet. Add GEMINI_API_KEY to server/.env.",
+      return res.json({
+        reply: buildFallbackReply(message),
+        source: "fallback",
       });
     }
 
@@ -53,11 +76,13 @@ exports.chatWithGemini = async (req, res) => {
 
     return res.json({
       reply: reply || "I can help with SevaLink questions, volunteering ideas, and platform guidance.",
+      source: "gemini",
     });
   } catch (error) {
-    return res.status(500).json({
-      message: "Unable to generate a chatbot response right now.",
-      error: error.message,
+    return res.json({
+      reply: buildFallbackReply(req.body?.message),
+      source: "fallback",
+      warning: error.message,
     });
   }
 };

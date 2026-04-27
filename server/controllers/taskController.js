@@ -203,9 +203,13 @@ async function getVolunteerDashboard(req, res) {
       Task.find({ status: "completion_requested", "assignedVolunteer.volunteer": volunteerId }).sort({
         completionRequestedAt: -1,
       }),
-      Task.find({ status: "completed", "assignedVolunteer.volunteer": volunteerId }).sort({
-        completedAt: -1,
-      }),
+      Task.find({
+        status: "completed",
+        $or: [
+          { "assignedVolunteer.volunteer": volunteerId },
+          { "applications.volunteer": volunteerId },
+        ],
+      }).sort({ completedAt: -1 }),
     ]);
 
     return res.json({

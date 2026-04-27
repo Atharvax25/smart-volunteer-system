@@ -8,6 +8,19 @@ export const API_BASE_URL =
   configuredApiBaseUrl ||
   (localHostname ? `http://${window.location.hostname}:5000/api` : "/api");
 export const STORAGE_KEY = "sevalink-auth";
+export const AUTH_EVENT = "sevalink-auth-changed";
+
+function emitAuthChange(session) {
+  if (!isBrowser) {
+    return;
+  }
+
+  window.dispatchEvent(
+    new CustomEvent(AUTH_EVENT, {
+      detail: session,
+    })
+  );
+}
 
 export function getStoredSession() {
   const value = localStorage.getItem(STORAGE_KEY);
@@ -16,10 +29,12 @@ export function getStoredSession() {
 
 export function setStoredSession(session) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(session));
+  emitAuthChange(session);
 }
 
 export function clearStoredSession() {
   localStorage.removeItem(STORAGE_KEY);
+  emitAuthChange(null);
 }
 
 export function readJsonStorage(key, fallbackValue) {

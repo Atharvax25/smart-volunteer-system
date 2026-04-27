@@ -10,7 +10,7 @@ import {
   useState,
 } from "react";
 import { CircleMarker, MapContainer, TileLayer, useMap, useMapEvents } from "react-leaflet";
-import { Link } from "react-router-dom";
+import { Link, NavLink, Navigate, useLocation } from "react-router-dom";
 import { toast } from "react-toastify";
 import { createSpeechRecognition } from "./utils/speech";
 import {
@@ -44,6 +44,16 @@ const severityCopy = {
     accent: "Immediate escalation",
   },
 };
+
+const NGO_VIEWS = ["overview", "create", "board"];
+const VOLUNTEER_VIEWS = [
+  "overview",
+  "opportunities",
+  "pending",
+  "active",
+  "review",
+  "completed",
+];
 
 function normalizeText(value) {
   return String(value || "").trim().toLowerCase();
@@ -295,6 +305,7 @@ function TaskLocationPicker({ latitude, longitude, onPick }) {
 }
 
 function Tasks() {
+  const routeLocation = useLocation();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [location, setLocation] = useState("");
@@ -401,8 +412,12 @@ function Tasks() {
     return data;
   }, []);
 
-  const fetchPublicTasks = useCallback(async () => {
-    setLoading(true);
+  const fetchPublicTasks = useCallback(async (options = {}) => {
+    const { silent = false } = options;
+    if (!silent) {
+      setLoading(true);
+    }
+
     try {
       const response = await fetch(`${API_BASE_URL}/tasks?status=open`);
       const data = await response.json();
@@ -424,18 +439,24 @@ function Tasks() {
       setCompletionRequestedTasks([]);
       setCompletedTasks([]);
 
-      if (cachedTasks.length) {
+      if (!silent && cachedTasks.length) {
         toast.info("Showing cached open tasks while offline");
-      } else {
+      } else if (!silent) {
         toast.error(error.message || "Unable to load current tasks");
       }
     } finally {
-      setLoading(false);
+      if (!silent) {
+        setLoading(false);
+      }
     }
   }, []);
 
-  const fetchVolunteerDashboard = useCallback(async (token) => {
-    setLoading(true);
+  const fetchVolunteerDashboard = useCallback(async (token, options = {}) => {
+    const { silent = false } = options;
+    if (!silent) {
+      setLoading(true);
+    }
+
     try {
       const response = await fetch(`${API_BASE_URL}/tasks/volunteer/dashboard`, {
         headers: {
@@ -468,23 +489,25 @@ function Tasks() {
       setCompletionRequestedTasks(cachedDashboard.completionRequestedTasks || []);
       setCompletedTasks(cachedDashboard.completedTasks || []);
 
-      if ((cachedDashboard.openTasks || []).length) {
+      if (!silent && (cachedDashboard.openTasks || []).length) {
         toast.info("Showing cached volunteer dashboard while offline");
-      } else {
+      } else if (!silent) {
         toast.error(error.message || "Unable to load volunteer dashboard");
       }
     } finally {
-      setLoading(false);
+      if (!silent) {
+        setLoading(false);
+      }
     }
   }, []);
 
-  const refreshCurrentView = useCallback(async () => {
+  const refreshCurrentView = useCallback(async (options = {}) => {
     if (session?.user.role === "Volunteer") {
-      await fetchVolunteerDashboard(session.token);
+      await fetchVolunteerDashboard(session.token, options);
       return;
     }
 
-    await fetchPublicTasks();
+    await fetchPublicTasks(options);
   }, [fetchPublicTasks, fetchVolunteerDashboard, session]);
 
   const syncQueuedTasks = useCallback(async () => {
@@ -561,6 +584,28 @@ function Tasks() {
       syncQueuedTasks();
     }
   }, [session, syncQueuedTasks]);
+
+  useEffect(() => {
+    if (!session?.token || session.user.role !== "Volunteer") {
+      return undefined;
+    }
+
+    const refreshVolunteerData = () => {
+      if (!navigator.onLine || document.visibilityState === "hidden") {
+        return;
+      }
+
+      fetchVolunteerDashboard(session.token, { silent: true });
+    };
+
+    const interval = window.setInterval(refreshVolunteerData, 30000);
+    window.addEventListener("focus", refreshVolunteerData);
+
+    return () => {
+      window.clearInterval(interval);
+      window.removeEventListener("focus", refreshVolunteerData);
+    };
+  }, [fetchVolunteerDashboard, session]);
 
   useEffect(() => {
     return () => {
@@ -713,6 +758,12 @@ function Tasks() {
 
   const isVolunteer = session?.user.role === "Volunteer";
   const isAdmin = session?.user.role === "NGO";
+  const taskSubpath = routeLocation.pathname.replace(/^\/tasks\/?/, "") || "";
+  const requestedView = taskSubpath.split("/")[0] || "";
+  const allowedViews = isVolunteer ? VOLUNTEER_VIEWS : isAdmin ? NGO_VIEWS : ["browse"];
+  const activeView = allowedViews.includes(requestedView)
+    ? requestedView
+    : allowedViews[0];
   const volunteerSkills = useMemo(
     () => normalizeSkillList(session?.user?.skills || []),
     [session?.user?.skills]
@@ -855,6 +906,66 @@ function Tasks() {
     setSeverityFilter("all");
     setBoardMode("all");
   };
+
+  const ngoNavItems = [
+    {
+      key: "overview",
+      label: "Overview",
+      description: "Status, offline queue, and response signals",
+      to: "/tasks/overview",
+    },
+    {
+      key: "create",
+      label: "Create Task",
+      description: "Submit a new community issue",
+      to: "/tasks/create",
+    },
+    {
+      key: "board",
+      label: "Task Board",
+      description: "Review and filter current needs",
+      to: "/tasks/board",
+    },
+  ];
+
+  const volunteerNavItems = [
+    {
+      key: "overview",
+      label: "Overview",
+      description: "Profile snapshot and next best action",
+      to: "/tasks/overview",
+    },
+    {
+      key: "opportunities",
+      label: "Opportunities",
+      description: "Open tasks you can accept",
+      to: "/tasks/opportunities",
+    },
+    {
+      key: "pending",
+      label: "Pending",
+      description: "Assignments waiting for confirmation",
+      to: "/tasks/pending",
+    },
+    {
+      key: "active",
+      label: "Active",
+      description: "Tasks currently in progress",
+      to: "/tasks/active",
+    },
+    {
+      key: "review",
+      label: "Review",
+      description: "Tasks waiting for admin verification",
+      to: "/tasks/review",
+    },
+    {
+      key: "completed",
+      label: "Completed",
+      description: "Closed tasks and finished work",
+      to: "/tasks/completed",
+    },
+  ];
 
   const renderTaskList = (tasks, emptyMessage, options = {}) => {
     if (tasks.length === 0) {
@@ -1047,6 +1158,37 @@ function Tasks() {
     );
   };
 
+  const currentNavItems = isVolunteer ? volunteerNavItems : isAdmin ? ngoNavItems : [];
+
+  if (requestedView !== activeView || routeLocation.pathname === "/tasks") {
+    const fallbackTarget = isVolunteer || isAdmin ? `/tasks/${activeView}` : "/tasks/browse";
+    return <Navigate to={fallbackTarget} replace />;
+  }
+
+  const showNgoOverview = isAdmin && activeView === "overview";
+  const showNgoCreate = isAdmin && activeView === "create";
+  const showNgoBoard = isAdmin && activeView === "board";
+  const showVolunteerOverview = isVolunteer && activeView === "overview";
+  const showVolunteerOpportunities = isVolunteer && activeView === "opportunities";
+  const showVolunteerPending = isVolunteer && activeView === "pending";
+  const showVolunteerActive = isVolunteer && activeView === "active";
+  const showVolunteerReview = isVolunteer && activeView === "review";
+  const showVolunteerCompleted = isVolunteer && activeView === "completed";
+  const showGuestBrowse = !isVolunteer && !isAdmin;
+  const showSidePanel = showNgoOverview || showNgoCreate || showVolunteerOverview;
+  const showBoardPanel =
+    showNgoBoard ||
+    showVolunteerOpportunities ||
+    showVolunteerPending ||
+    showVolunteerActive ||
+    showVolunteerReview ||
+    showVolunteerCompleted ||
+    showGuestBrowse;
+  const volunteerCompletedCount = Math.max(
+    completedTasks.length,
+    session?.user?.tasksCompleted || 0
+  );
+
   return (
     <div className="task-page">
       <div className="task-ambient task-ambient-one" aria-hidden="true" />
@@ -1089,7 +1231,32 @@ function Tasks() {
           </div>
         </motion.section>
 
-        <div className="task-layout">
+        <nav className="task-workspace-nav" aria-label="Task workspace sections">
+          {(currentNavItems.length
+            ? currentNavItems
+            : [
+                {
+                  key: "browse",
+                  label: "Browse Tasks",
+                  description: "View open community requests",
+                  to: "/tasks/browse",
+                },
+              ]).map((item) => (
+            <NavLink
+              key={item.key}
+              to={item.to}
+              className={({ isActive }) =>
+                isActive ? "task-workspace-link active" : "task-workspace-link"
+              }
+            >
+              <strong>{item.label}</strong>
+              <span>{item.description}</span>
+            </NavLink>
+          ))}
+        </nav>
+
+        <div className={`task-layout ${showSidePanel && showBoardPanel ? "" : "task-layout-single"}`}>
+          {showSidePanel ? (
           <motion.aside
             className="task-card task-form-card"
             initial={{ opacity: 0, x: -18 }}
@@ -1098,24 +1265,36 @@ function Tasks() {
           >
             <div className="task-header-block">
               <span className="task-badge task-badge-soft">
-                {isVolunteer ? "Profile snapshot" : "Structured intake"}
+                {showVolunteerOverview
+                  ? "Profile snapshot"
+                  : showNgoOverview
+                    ? "Workspace overview"
+                    : "Structured intake"}
               </span>
-              <h2>{isVolunteer ? "Volunteer dashboard" : "Report a new community issue"}</h2>
+              <h2>
+                {showVolunteerOverview
+                  ? "Volunteer dashboard"
+                  : showNgoOverview
+                    ? "NGO task overview"
+                    : "Report a new community issue"}
+              </h2>
               <p className="task-desc">
-                {isVolunteer
+                {showVolunteerOverview
                   ? "Review open needs, track assignments, and spot the tasks that line up with your strengths."
-                  : "Clean inputs lead to faster triage. Add skills, urgency, image hints, and pin the issue directly on the map."}
+                  : showNgoOverview
+                    ? "Monitor queue health, offline readiness, and current pressure before creating or reviewing tasks."
+                    : "Clean inputs lead to faster triage. Add skills, urgency, image hints, and pin the issue directly on the map."}
               </p>
             </div>
 
-            {isOffline || queuedCount ? (
+            {(showNgoOverview || showNgoCreate) && (isOffline || queuedCount) ? (
               <div className="offline-banner">
                 <strong>{isOffline ? "Offline mode active" : "Offline queue ready"}</strong>
                 <span>{queuedCount} queued task{queuedCount === 1 ? "" : "s"} waiting to sync</span>
               </div>
             ) : null}
 
-            {session?.user ? (
+            {(showNgoOverview || showVolunteerOverview) && session?.user ? (
               <div className="task-session-panel">
                 <p className="task-session-note">
                   Signed in as <strong>{session.user.name}</strong> ({session.user.role})
@@ -1123,7 +1302,7 @@ function Tasks() {
                     ? ` · Skills: ${session.user.skills.join(", ")}`
                     : ""}
                   {isVolunteer
-                    ? ` · ${session.user.points || 0} pts · ${session.user.tasksCompleted || 0} completed`
+                    ? ` · ${session.user.points || 0} pts · ${volunteerCompletedCount} completed`
                     : ""}
                 </p>
 
@@ -1150,7 +1329,7 @@ function Tasks() {
                       <span>Waiting admin review</span>
                     </div>
                     <div className="task-summary-card">
-                      <strong>{completedTasks.length}</strong>
+                      <strong>{volunteerCompletedCount}</strong>
                       <span>Completed</span>
                     </div>
                     <div className="task-summary-card">
@@ -1173,13 +1352,13 @@ function Tasks() {
                   </div>
                 )}
               </div>
-            ) : (
+            ) : showVolunteerOverview || showNgoOverview ? (
               <p className="task-session-note">
                 You can view open tasks now. <Link to="/auth">Login or register</Link> to take action.
               </p>
-            )}
+            ) : null}
 
-            {isVolunteer && highlightedTask ? (
+            {showVolunteerOverview && highlightedTask ? (
               <motion.div
                 className="volunteer-focus-card"
                 whileHover={{ y: -6, rotateX: 2 }}
@@ -1198,7 +1377,41 @@ function Tasks() {
               </motion.div>
             ) : null}
 
-            {isAdmin ? (
+            {showVolunteerOverview ? (
+              <div className="task-subsection">
+                <div className="task-subsection-header">
+                  <div>
+                    <h3>Completed work</h3>
+                    <p>Your verified finished tasks stay visible here.</p>
+                  </div>
+                  <span className="task-subsection-count">{volunteerCompletedCount}</span>
+                </div>
+
+                {completedTasks.length ? (
+                  <div className="admin-simple-stack">
+                    {completedTasks.slice(0, 3).map((task) => (
+                      <article key={`overview-completed-${task._id}`} className="admin-simple-card">
+                        <div>
+                          <strong>{task.title}</strong>
+                          <p>{task.location}</p>
+                        </div>
+                        <span className={`task-status-chip status-${task.status || "completed"}`}>
+                          completed
+                        </span>
+                      </article>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="task-empty">No completed tasks are loaded yet.</p>
+                )}
+
+                <Link to="/tasks/completed" className="task-admin-link">
+                  View all completed tasks
+                </Link>
+              </div>
+            ) : null}
+
+            {showNgoCreate ? (
               <>
                 <form className="task-form" onSubmit={handleSubmit}>
                   <div className="task-form-section">
@@ -1331,13 +1544,15 @@ function Tasks() {
                   Open admin dashboard for predictions, heatmap, matching, and assignment
                 </Link>
               </>
-            ) : !isVolunteer ? (
-              <p className="task-empty">
-                Login as a volunteer to review assignments or as an NGO to create, match, and assign tasks.
-              </p>
+            ) : showNgoOverview ? (
+              <Link to="/admin" className="task-admin-link">
+                Open admin dashboard for predictions, heatmap, matching, and assignment
+              </Link>
             ) : null}
           </motion.aside>
+          ) : null}
 
+          {showBoardPanel ? (
           <motion.section
             className="task-card task-list-card"
             initial={{ opacity: 0, x: 18 }}
@@ -1346,10 +1561,38 @@ function Tasks() {
           >
             <div className="task-list-header">
               <div>
-                <span className="task-badge task-badge-light">Live task board</span>
-                <h2>{isVolunteer ? "Tasks available for you" : "Current network needs"}</h2>
+                <span className="task-badge task-badge-light">
+                  {showVolunteerPending || showVolunteerActive || showVolunteerReview || showVolunteerCompleted
+                    ? "Volunteer queue"
+                    : "Live task board"}
+                </span>
+                <h2>
+                  {showNgoBoard
+                    ? "Current network needs"
+                    : showVolunteerOpportunities
+                      ? "Tasks available for you"
+                      : showVolunteerPending
+                        ? "Admin assignment requests"
+                        : showVolunteerActive
+                          ? "Your assigned tasks"
+                          : showVolunteerReview
+                            ? "Waiting for admin verification"
+                            : showVolunteerCompleted
+                              ? "Your completed tasks"
+                              : "Public task board"}
+                </h2>
               </div>
-              <p className="task-count">{openCountLabel}</p>
+              <p className="task-count">
+                {showVolunteerPending
+                  ? `${filteredPendingTasks.length} waiting`
+                  : showVolunteerActive
+                    ? `${filteredAssignedTasks.length} active`
+                    : showVolunteerReview
+                      ? `${filteredCompletionRequestedTasks.length} in review`
+                      : showVolunteerCompleted
+                        ? `${filteredCompletedTasks.length} completed`
+                        : openCountLabel}
+              </p>
             </div>
 
             <div className="task-toolbar">
@@ -1376,28 +1619,32 @@ function Tasks() {
                   <option value="critical">Critical</option>
                 </select>
 
-                <button
-                  type="button"
-                  className={boardMode === "all" ? "task-mode-chip active" : "task-mode-chip"}
-                  onClick={() => setBoardMode("all")}
-                >
-                  All
-                </button>
-                <button
-                  type="button"
-                  className={boardMode === "priority" ? "task-mode-chip active" : "task-mode-chip"}
-                  onClick={() => setBoardMode("priority")}
-                >
-                  Priority
-                </button>
-                {isVolunteer ? (
-                  <button
-                    type="button"
-                    className={boardMode === "matched" ? "task-mode-chip active" : "task-mode-chip"}
-                    onClick={() => setBoardMode("matched")}
-                  >
-                    Skill matched
-                  </button>
+                {showNgoBoard || showVolunteerOpportunities || showGuestBrowse ? (
+                  <>
+                    <button
+                      type="button"
+                      className={boardMode === "all" ? "task-mode-chip active" : "task-mode-chip"}
+                      onClick={() => setBoardMode("all")}
+                    >
+                      All
+                    </button>
+                    <button
+                      type="button"
+                      className={boardMode === "priority" ? "task-mode-chip active" : "task-mode-chip"}
+                      onClick={() => setBoardMode("priority")}
+                    >
+                      Priority
+                    </button>
+                    {isVolunteer ? (
+                      <button
+                        type="button"
+                        className={boardMode === "matched" ? "task-mode-chip active" : "task-mode-chip"}
+                        onClick={() => setBoardMode("matched")}
+                      >
+                        Skill matched
+                      </button>
+                    ) : null}
+                  </>
                 ) : null}
                 <button type="button" className="task-reset-btn" onClick={resetFilters}>
                   Reset
@@ -1407,73 +1654,36 @@ function Tasks() {
 
             {loading ? (
               <p className="task-empty">Loading tasks...</p>
-            ) : (
+            ) : showNgoBoard || showGuestBrowse ? (
+              renderTaskList(filteredOpenTasks, "No open tasks match the current filters.")
+            ) : showVolunteerOpportunities ? (
               renderTaskList(filteredOpenTasks, "No open tasks match the current filters.", {
-                showApply: isVolunteer,
+                showApply: true,
               })
+            ) : showVolunteerPending ? (
+              renderTaskList(
+                filteredPendingTasks,
+                "No assignments are waiting for your confirmation.",
+                { showConfirm: true }
+              )
+            ) : showVolunteerActive ? (
+              renderTaskList(filteredAssignedTasks, "No tasks have been assigned to you yet.", {
+                showComplete: true,
+              })
+            ) : showVolunteerReview ? (
+              renderTaskList(
+                filteredCompletionRequestedTasks,
+                "No task is currently waiting for admin verification."
+              )
+            ) : showVolunteerCompleted ? (
+              renderTaskList(filteredCompletedTasks, "No completed tasks yet.")
+            ) : (
+              <p className="task-empty">
+                Login as a volunteer to review assignments or as an NGO to create, match, and assign tasks.
+              </p>
             )}
-
-            {isVolunteer ? (
-              <div className="task-subsection">
-                <div className="task-subsection-header">
-                  <div>
-                    <h3>Admin assignment requests</h3>
-                    <p>Confirm new assignments so they move into your active queue.</p>
-                  </div>
-                  <span className="task-subsection-count">{filteredPendingTasks.length}</span>
-                </div>
-                {renderTaskList(
-                  filteredPendingTasks,
-                  "No assignments are waiting for your confirmation.",
-                  { showConfirm: true }
-                )}
-              </div>
-            ) : null}
-
-            {isVolunteer ? (
-              <div className="task-subsection">
-                <div className="task-subsection-header">
-                  <div>
-                    <h3>Your assigned tasks</h3>
-                    <p>Keep momentum visible and close tasks once the work is done.</p>
-                  </div>
-                  <span className="task-subsection-count">{filteredAssignedTasks.length}</span>
-                </div>
-                {renderTaskList(filteredAssignedTasks, "No tasks have been assigned to you yet.", {
-                  showComplete: true,
-                })}
-              </div>
-            ) : null}
-
-            {isVolunteer ? (
-              <div className="task-subsection">
-                <div className="task-subsection-header">
-                  <div>
-                    <h3>Waiting for admin verification</h3>
-                    <p>Tasks you completed from your side and sent for admin cross-check.</p>
-                  </div>
-                  <span className="task-subsection-count">{filteredCompletionRequestedTasks.length}</span>
-                </div>
-                {renderTaskList(
-                  filteredCompletionRequestedTasks,
-                  "No task is currently waiting for admin verification."
-                )}
-              </div>
-            ) : null}
-
-            {isVolunteer ? (
-              <div className="task-subsection">
-                <div className="task-subsection-header">
-                  <div>
-                    <h3>Your completed tasks</h3>
-                    <p>A running record of work you have already closed out.</p>
-                  </div>
-                  <span className="task-subsection-count">{filteredCompletedTasks.length}</span>
-                </div>
-                {renderTaskList(filteredCompletedTasks, "No completed tasks yet.")}
-              </div>
-            ) : null}
           </motion.section>
+          ) : null}
         </div>
       </div>
     </div>
