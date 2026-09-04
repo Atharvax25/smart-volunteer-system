@@ -34,7 +34,7 @@ async function sendEmail(to, subject, text, options = {}) {
 
   try {
     const info = await transport.sendMail({
-      from: process.env.MAIL_FROM || "noreply@sevalink.local",
+      from: process.env.MAIL_FROM || "noreply@samadhan-setu.local",
       to,
       subject,
       text,
@@ -84,7 +84,7 @@ async function notifyVolunteerAssignment(task, volunteer) {
     `Severity: ${task.severity.toUpperCase()}`,
     `Category: ${task.category}`,
     "",
-    "Please log in to SevaLink to confirm your assignment.",
+    "Please log in to Samadhan Setu to confirm your assignment.",
   ].join("\n");
 
   return sendEmail(volunteer.email, subject, message, {
@@ -110,7 +110,7 @@ async function notifyNearbyVolunteers(task, rankedMatches) {
           `Task: ${task.title}`,
           `Category: ${task.category}`,
           "",
-          "Log in to SevaLink to review and apply if you are available.",
+          "Log in to Samadhan Setu to review and apply if you are available.",
         ].join("\n"),
         {
           ngoId: task.ngoId,
@@ -124,11 +124,11 @@ async function notifyNearbyVolunteers(task, rankedMatches) {
 }
 
 async function sendPasswordResetOtp(user, otpCode) {
-  const subject = "Your SevaLink password reset code";
+  const subject = "Your Samadhan Setu password reset code";
   const message = [
     `Hello ${user.name},`,
     "",
-    "We received a request to reset your SevaLink password.",
+    "We received a request to reset your Samadhan Setu password.",
     `Use this one-time code to continue: ${otpCode}`,
     "",
     "This code expires in 10 minutes.",

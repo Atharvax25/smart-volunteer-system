@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import sevalinkLogo from "./assets/sevalink-logo-3d.png";
+import samadhanSetuLogo from "./assets/samadhan-setu-logo-horizontal.svg";
 
 const particles = [
   { left: "16%", top: "18%", duration: 5.4, delay: 0.2 },
@@ -64,7 +64,7 @@ function IntroScreen() {
           animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
           transition={{ duration: 0.55, ease: "easeInOut" }}
         >
-          <img src={sevalinkLogo} alt="SevaLink logo" className="intro-logo" />
+          <img src={samadhanSetuLogo} alt="Samadhan Setu logo" className="intro-logo" />
         </motion.div>
 
         <motion.h1
@@ -73,7 +73,7 @@ function IntroScreen() {
           animate={{ opacity: 1, y: 0, letterSpacing: "0.06em" }}
           transition={{ duration: 0.55, delay: 0.12, ease: "easeOut" }}
         >
-          SevaLink
+          Samadhan Setu
         </motion.h1>
 
         <motion.h1

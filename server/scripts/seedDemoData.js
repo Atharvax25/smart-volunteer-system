@@ -6,9 +6,9 @@ const Task = require("../models/Task");
 const User = require("../models/User");
 const { hashPassword } = require("../utils/auth");
 
-const DEMO_TASK_PREFIX = "SevaLink Demo:";
-const DEMO_VOLUNTEER_EMAIL_PATTERN = /^demo\.volunteer\d+@sevalink\.local$/;
-const DEMO_NGO_EMAIL_PATTERN = /^demo\.ngo\d+@sevalink\.local$/;
+const DEMO_TASK_PREFIX = "Samadhan Setu Demo:";
+const DEMO_VOLUNTEER_EMAIL_PATTERN = /^demo\.volunteer\d+@samadhan-setu\.local$/;
+const DEMO_NGO_EMAIL_PATTERN = /^demo\.ngo\d+@samadhan-setu\.local$/;
 const DEMO_PASSWORD = "demo123456";
 
 const cities = [
@@ -92,7 +92,7 @@ async function ensureNgoAccounts() {
   for (let index = ngoAccounts.length; index < 3; index += 1) {
     const nextNgo = await User.create({
       name: `Demo NGO ${index + 1}`,
-      email: `demo.ngo${index + 1}@sevalink.local`,
+      email: `demo.ngo${index + 1}@samadhan-setu.local`,
       passwordHash: hashPassword(DEMO_PASSWORD),
       role: "NGO",
       organizationName: `Demo NGO ${index + 1}`,
@@ -124,7 +124,7 @@ async function createVolunteers() {
     const city = pick(cities, index);
     const volunteer = await User.create({
       name: `Demo Volunteer ${index + 1}`,
-      email: `demo.volunteer${index + 1}@sevalink.local`,
+      email: `demo.volunteer${index + 1}@samadhan-setu.local`,
       passwordHash: hashPassword(DEMO_PASSWORD),
       role: "Volunteer",
       skills: createSkillSet(index),

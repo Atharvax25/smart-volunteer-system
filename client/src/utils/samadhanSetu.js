@@ -7,8 +7,8 @@ const localHostname =
 export const API_BASE_URL =
   configuredApiBaseUrl ||
   (localHostname ? `http://${window.location.hostname}:5000/api` : "/api");
-export const STORAGE_KEY = "sevalink-auth";
-export const AUTH_EVENT = "sevalink-auth-changed";
+export const STORAGE_KEY = "samadhan-setu-auth";
+export const AUTH_EVENT = "samadhan-setu-auth-changed";
 
 function emitAuthChange(session) {
   if (!isBrowser) {

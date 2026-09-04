@@ -1,12 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import "./App.css";
-import sevalinkLogo from "./assets/sevalink-logo-3d.png";
+import samadhanSetuLogo from "./assets/samadhan-setu-logo-horizontal.svg";
 import {
   AUTH_EVENT,
   clearStoredSession,
   getStoredSession,
-} from "./utils/sevalink";
+} from "./utils/samadhanSetu";
 
 function Navbar() {
   const [session, setSession] = useState(() => getStoredSession());
@@ -51,7 +51,7 @@ function Navbar() {
     <div className="navbar">
       <Link to="/home" className="logo-link">
         <div className="nav-brand">
-          <img className="nav-brand-logo" src={sevalinkLogo} alt="SevaLink logo" />
+          <img className="nav-brand-logo" src={samadhanSetuLogo} alt="Samadhan Setu logo" />
         </div>
       </Link>
 
@@ -64,7 +64,7 @@ function Navbar() {
         {session?.user ? (
           <div className="nav-profile-shell">
             <Link to={profileLink} className="nav-profile-card">
-              <span className="nav-profile-avatar">{initials || "SL"}</span>
+              <span className="nav-profile-avatar">{initials || "SS"}</span>
               <span className="nav-profile-copy">
                 <strong>{session.user.name}</strong>
                 <small>{session.user.role === "NGO" ? "NGO Profile" : "Volunteer Profile"}</small>

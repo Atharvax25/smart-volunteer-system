@@ -8,7 +8,7 @@ import {
   clearStoredSession,
   getStoredSession,
   setStoredSession,
-} from "./utils/sevalink";
+} from "./utils/samadhanSetu";
 
 const initialState = {
   login: {
@@ -80,7 +80,7 @@ function Auth() {
         endpoint: "login",
       },
       register: {
-        badge: "Join SevaLink",
+        badge: "Join Samadhan Setu",
         title: "Create a polished profile and start helping with confidence.",
         subtitle:
           "Volunteers can highlight skills and availability while NGOs can onboard into a more structured command workspace.",
@@ -591,7 +591,7 @@ function Auth() {
           )}
 
           <p className="auth-footnote">
-            SevaLink supports smarter matching, volunteer recognition, and recovery tools that are easier to use under pressure.
+            Samadhan Setu supports smarter matching, volunteer recognition, and recovery tools that are easier to use under pressure.
           </p>
 
           <Link to="/" className="auth-back-link">

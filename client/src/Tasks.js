@@ -19,11 +19,11 @@ import {
   getStoredSession,
   readJsonStorage,
   writeJsonStorage,
-} from "./utils/sevalink";
+} from "./utils/samadhanSetu";
 
-const PUBLIC_TASK_CACHE_KEY = "sevalink-public-task-cache";
-const VOLUNTEER_TASK_CACHE_KEY = "sevalink-volunteer-task-cache";
-const OFFLINE_TASK_QUEUE_KEY = "sevalink-offline-task-queue";
+const PUBLIC_TASK_CACHE_KEY = "samadhan-setu-public-task-cache";
+const VOLUNTEER_TASK_CACHE_KEY = "samadhan-setu-volunteer-task-cache";
+const OFFLINE_TASK_QUEUE_KEY = "samadhan-setu-offline-task-queue";
 const MAP_FALLBACK_CENTER = [20.5937, 78.9629];
 
 const severityCopy = {

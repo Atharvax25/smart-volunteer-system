@@ -5,9 +5,9 @@ const Notification = require("../models/Notification");
 const Task = require("../models/Task");
 const User = require("../models/User");
 
-const DEMO_TASK_PREFIX = "SevaLink Demo:";
-const DEMO_VOLUNTEER_EMAIL_PATTERN = /^demo\.volunteer\d+@sevalink\.local$/;
-const DEMO_NGO_EMAIL_PATTERN = /^demo\.ngo\d+@sevalink\.local$/;
+const DEMO_TASK_PREFIX = "Samadhan Setu Demo:";
+const DEMO_VOLUNTEER_EMAIL_PATTERN = /^demo\.volunteer\d+@samadhan-setu\.local$/;
+const DEMO_NGO_EMAIL_PATTERN = /^demo\.ngo\d+@samadhan-setu\.local$/;
 
 async function main() {
   if (!process.env.MONGO_URI) {

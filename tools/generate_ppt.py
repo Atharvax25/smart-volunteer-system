@@ -10,7 +10,7 @@ from PIL import Image, ImageDraw, ImageFont
 
 WORKSPACE = Path(r"c:\Users\athar\OneDrive\Documents\Desktop\smart-volunteer-system")
 TEMPLATE = Path(r"c:\Users\athar\Downloads\[EXT] Solution Challenge 2026 - Prototype PPT Template.pptx")
-OUTPUT = WORKSPACE / "SevaLink_Solution_Challenge_Prototype.pptx"
+OUTPUT = WORKSPACE / "Samadhan_Setu_Solution_Challenge_Prototype.pptx"
 ASSETS = WORKSPACE / "client" / "src" / "assets"
 GENERATED = WORKSPACE / "generated_ppt_assets"
 
@@ -97,7 +97,7 @@ def create_process_flow(path):
     label_font = get_font(24, bold=True)
     body_font = get_font(21)
 
-    draw.text((70, 40), "SevaLink Volunteer Response Flow", fill="#112A46", font=title_font)
+    draw.text((70, 40), "Samadhan Setu Volunteer Response Flow", fill="#112A46", font=title_font)
     draw.text(
         (70, 100),
         "From issue reporting to verified completion with AI-assisted triage and NGO oversight",
@@ -201,7 +201,7 @@ def create_wireframe(path):
 def create_architecture(path):
     img = Image.new("RGB", (1600, 900), "#F7F9FC")
     draw = ImageDraw.Draw(img)
-    draw.text((70, 40), "SevaLink System Architecture", fill="#112A46", font=get_font(46, bold=True))
+    draw.text((70, 40), "Samadhan Setu System Architecture", fill="#112A46", font=get_font(46, bold=True))
     draw.text((70, 100), "React client, Express APIs, MongoDB storage, Gemini assistant, and notification services", fill="#4A6078", font=get_font(24))
 
     sections = [
@@ -241,7 +241,7 @@ def create_snapshots(path):
     img = Image.new("RGB", (1600, 900), "#F8FAFD")
     draw = ImageDraw.Draw(img)
     draw.text((70, 38), "Prototype Snapshot Highlights", fill="#112A46", font=get_font(46, bold=True))
-    draw.text((70, 96), "Representative UI surfaces from the current SevaLink MVP", fill="#4A6078", font=get_font(24))
+    draw.text((70, 96), "Representative UI surfaces from the current Samadhan Setu MVP", fill="#4A6078", font=get_font(24))
 
     cards = [
         ("Homepage & branding", ASSETS / "hero.png", (70, 150, 770, 430)),
@@ -393,7 +393,7 @@ def update_slide_texts(zip_in, zip_out):
         2: [
             ("Team Details", 0),
             ("", 0),
-            ("Team name: SevaLink", 0),
+            ("Team name: Samadhan Setu", 0),
             ("Team leader name: Atharva Holsambre", 0),
             (
                 "Problem Statement: NGOs and volunteers often struggle to coordinate urgent community needs quickly, clearly, and fairly across locations.",
@@ -404,7 +404,7 @@ def update_slide_texts(zip_in, zip_out):
             ("Brief about your solution", 0),
             ("", 0),
             (
-                "SevaLink is a smart volunteer coordination platform that helps NGOs capture community issues, identify urgency, and route tasks to the right volunteers.",
+                "Samadhan Setu is a smart volunteer coordination platform that helps NGOs capture community issues, identify urgency, and route tasks to the right volunteers.",
                 0,
             ),
             (
@@ -420,7 +420,7 @@ def update_slide_texts(zip_in, zip_out):
             ("Opportunities", 0),
             ("How different is it from any of the other existing ideas?", 0),
             (
-                "SevaLink combines task creation, skill-based volunteer matching, heatmaps, predictive analytics, offline-safe reporting, and NGO verification in one product instead of splitting them across separate tools.",
+                "Samadhan Setu combines task creation, skill-based volunteer matching, heatmaps, predictive analytics, offline-safe reporting, and NGO verification in one product instead of splitting them across separate tools.",
                 0,
             ),
             ("How will it be able to solve the problem?", 0),
@@ -553,7 +553,7 @@ def add_slide_images(zip_in, zip_out, media_map):
                 int(5.25 * EMU_PER_INCH),
                 int(8.5 * EMU_PER_INCH),
                 int(0.5 * EMU_PER_INCH),
-                [("Shows the NGO-to-volunteer task lifecycle supported by SevaLink.", 16, False, "4A6078")],
+                [("Shows the NGO-to-volunteer task lifecycle supported by Samadhan Setu.", 16, False, "4A6078")],
             )
 
         zip_out.writestr(slide_path, ET.tostring(root, encoding="utf-8", xml_declaration=True))

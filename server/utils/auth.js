@@ -1,6 +1,6 @@
 const crypto = require("crypto");
 
-const TOKEN_SECRET = process.env.TOKEN_SECRET || "sevalink-dev-secret";
+const TOKEN_SECRET = process.env.TOKEN_SECRET || "samadhan-setu-dev-secret";
 const TOKEN_TTL_MS = 1000 * 60 * 60 * 24 * 7;
 
 function base64UrlEncode(value) {

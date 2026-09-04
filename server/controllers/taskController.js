@@ -400,7 +400,7 @@ async function requestTaskCompletion(req, res) {
 
     await Notification.create({
       type: "system",
-      recipientEmail: ngo?.email || req.user.email || "noreply@sevalink.local",
+      recipientEmail: ngo?.email || req.user.email || "noreply@samadhan-setu.local",
       recipientName: ngo?.organizationName || ngo?.name || "",
       subject: "Volunteer requested task completion review",
       message: `${task.assignedVolunteer?.volunteerName || "A volunteer"} marked "${task.title}" as completed and requested admin verification.`,

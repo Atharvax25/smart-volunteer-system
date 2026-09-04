@@ -8,7 +8,7 @@ import Loader from "./Loader";
 import LeaderboardPanel from "./components/LeaderboardPanel";
 import PredictionBanner from "./components/PredictionBanner";
 import TaskHeatmap from "./components/TaskHeatmap";
-import { API_BASE_URL, getAssetUrl, getStoredSession } from "./utils/sevalink";
+import { API_BASE_URL, getAssetUrl, getStoredSession } from "./utils/samadhanSetu";
 
 import {
   ArcElement,

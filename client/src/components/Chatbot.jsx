@@ -1,17 +1,17 @@
 import { useEffect, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
-import { API_BASE_URL } from "../utils/sevalink";
+import { API_BASE_URL } from "../utils/samadhanSetu";
 
 const starterPrompts = [
   "How can I help today?",
-  "Explain SevaLink features",
+  "Explain Samadhan Setu features",
   "Suggest volunteer tasks",
 ];
 
 const initialMessages = [
   {
     role: "assistant",
-    text: "Hi, I'm the SevaLink Assistant. Ask me how to help, how the platform works, or what volunteers can do next.",
+    text: "Hi, I'm the Samadhan Setu Assistant. Ask me how to help, how the platform works, or what volunteers can do next.",
   },
 ];
 
@@ -111,11 +111,11 @@ function Chatbot() {
           );
         }
 
-        throw new Error("Unable to connect to the SevaLink Assistant.");
+        throw new Error("Unable to connect to the Samadhan Setu Assistant.");
       }
 
       if (!response.ok) {
-        throw new Error(data.message || "Unable to reach the SevaLink Assistant.");
+        throw new Error(data.message || "Unable to reach the Samadhan Setu Assistant.");
       }
 
       setMessages((currentMessages) => [
@@ -124,13 +124,13 @@ function Chatbot() {
           role: "assistant",
           text:
             data.reply ||
-            "I can help with SevaLink questions, volunteer guidance, and feature walkthroughs.",
+            "I can help with Samadhan Setu questions, volunteer guidance, and feature walkthroughs.",
         },
       ]);
     } catch (requestError) {
       const fallbackMessage =
         requestError.message ||
-        "The SevaLink Assistant is unavailable right now. Please try again shortly.";
+        "The Samadhan Setu Assistant is unavailable right now. Please try again shortly.";
 
       setError(fallbackMessage);
       setMessages((currentMessages) => [
@@ -158,14 +158,14 @@ function Chatbot() {
         <div className="chatbot-header">
           <div>
             <span className="chatbot-badge">AI Guide</span>
-            <h3>SevaLink Assistant</h3>
+            <h3>Samadhan Setu Assistant</h3>
             <p>Volunteer guidance, task ideas, and platform help in one place.</p>
           </div>
           <button
             type="button"
             className="chatbot-close-btn"
             onClick={() => setIsOpen(false)}
-            aria-label="Close SevaLink Assistant"
+            aria-label="Close Samadhan Setu Assistant"
           >
             x
           </button>
@@ -215,7 +215,7 @@ function Chatbot() {
             value={message}
             onChange={(event) => setMessage(event.target.value)}
             onKeyDown={handleComposerKeyDown}
-            placeholder="Ask about tasks, volunteering, or how SevaLink works..."
+            placeholder="Ask about tasks, volunteering, or how Samadhan Setu works..."
             rows={2}
           />
           <button
@@ -234,14 +234,14 @@ function Chatbot() {
         className={`chatbot-fab${isOpen ? " chatbot-fab-open" : ""}`}
         onClick={() => setIsOpen((currentState) => !currentState)}
         aria-expanded={isOpen}
-        aria-label={isOpen ? "Close SevaLink Assistant" : "Open SevaLink Assistant"}
+        aria-label={isOpen ? "Close Samadhan Setu Assistant" : "Open Samadhan Setu Assistant"}
       >
         <span className="chatbot-fab-icon" aria-hidden="true">
           {isOpen ? "x" : "+"}
         </span>
         <span className="chatbot-fab-copy">
           <strong>{isOpen ? "Close assistant" : "Need help?"}</strong>
-          <small>{isOpen ? "Return to SevaLink" : "Ask SevaLink AI"}</small>
+          <small>{isOpen ? "Return to Samadhan Setu" : "Ask Samadhan Setu AI"}</small>
         </span>
       </button>
     </div>

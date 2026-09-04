@@ -11,7 +11,7 @@ import {
   useTransform,
 } from "framer-motion";
 import heroImg from "./assets/hero.png";
-import sevalinkLogo from "./assets/sevalink-logo-3d.png";
+import samadhanSetuLogo from "./assets/samadhan-setu-logo-horizontal.svg";
 import impactStoryImage from "./assets/21.png";
 import "./App.css";
 import Footer from "./Footer";
@@ -88,7 +88,7 @@ const testimonials = [
 const impactStory = {
   title: "Real Impact in Action",
   subtitle:
-    "See how SevaLink connects people and changes lives through real help and community support.",
+    "See how Samadhan Setu connects people and changes lives through real help and community support.",
   caption: "Every action creates impact",
 };
 
@@ -433,7 +433,7 @@ function Home() {
                 animate={{ y: [0, -8, 0], rotateZ: [0, 1.5, 0] }}
                 transition={{ duration: 6.5, repeat: Infinity, ease: "easeInOut" }}
               >
-                <img src={sevalinkLogo} alt="SevaLink logo" className="hero-logo-image" />
+                <img src={samadhanSetuLogo} alt="Samadhan Setu logo" className="hero-logo-image" />
               </motion.div>
             </motion.div>
 
@@ -442,7 +442,7 @@ function Home() {
               custom={0.12}
               variants={revealUp}
             >
-              SevaLink
+              Samadhan Setu
             </motion.h1>
 
             <motion.p className="hero-subtitle" custom={0.18} variants={revealUp}>
@@ -563,7 +563,7 @@ function Home() {
           <span className="eyebrow">Core Signals</span>
           <h2>Clear product signals instead of placeholder metrics.</h2>
           <p>
-            These tiles highlight the kind of coordination experience SevaLink
+            These tiles highlight the kind of coordination experience Samadhan Setu
             is built to deliver without implying fake live production numbers.
           </p>
         </motion.div>
@@ -583,7 +583,7 @@ function Home() {
         viewport={{ once: true, amount: 0.2 }}
       >
         <motion.div className="section-heading" custom={0} variants={revealUp}>
-          <span className="eyebrow">Why SevaLink works</span>
+          <span className="eyebrow">Why Samadhan Setu works</span>
           <h2>Helping hands, strong links, and a network that feels immediate.</h2>
           <p>
             The interface is designed to feel minimal and premium while giving
@@ -634,7 +634,7 @@ function Home() {
             <div className="impact-video-topline">
               <span className="impact-video-badge">Community Impact Story</span>
               <span className="impact-video-toggle impact-video-toggle-static">
-                SevaLink in the field
+                Samadhan Setu in the field
               </span>
             </div>
 
@@ -642,7 +642,7 @@ function Home() {
               <img
                 className="impact-video-player impact-story-image"
                 src={impactStoryImage}
-                alt="SevaLink volunteers supporting food distribution, education, medical aid, flood relief, and elderly care"
+                alt="Samadhan Setu volunteers supporting food distribution, education, medical aid, flood relief, and elderly care"
               />
 
               <div className="impact-video-overlay" aria-hidden="true">
@@ -725,7 +725,7 @@ function Home() {
           <span className="eyebrow">Real-World Impact</span>
           <h2>Built for missions where human support meets meaningful action.</h2>
           <p>
-            SevaLink strengthens <span className="gradient-text">rapid response</span>,{" "}
+            Samadhan Setu strengthens <span className="gradient-text">rapid response</span>,{" "}
             <span className="gradient-text">community resilience</span>, and{" "}
             <span className="gradient-text">practical help</span> across the moments that matter.
           </p>
@@ -746,10 +746,10 @@ function Home() {
         viewport={{ once: true, amount: 0.3 }}
       >
         <motion.div className="about-copy glass-panel" custom={0.05} variants={revealUp}>
-          <span className="eyebrow">About SevaLink</span>
+          <span className="eyebrow">About Samadhan Setu</span>
           <h2>A clean system for turning community problems into coordinated action.</h2>
           <p>
-            SevaLink blends helping hands, human connection, and a responsive
+            Samadhan Setu blends helping hands, human connection, and a responsive
             network into one focused product experience for organizers and volunteers.
           </p>
           <p>
@@ -783,7 +783,7 @@ function Home() {
       >
         <motion.div className="section-heading" custom={0} variants={revealUp}>
           <span className="eyebrow">Team & Contributors</span>
-          <h2>Meet the Team Behind SevaLink</h2>
+          <h2>Meet the Team Behind Samadhan Setu</h2>
           <p>
             Built collaboratively with a focus on innovation, scalability, and
             real-world impact.

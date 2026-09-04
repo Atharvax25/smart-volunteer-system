@@ -38,6 +38,6 @@
   <path d="M171 175C195 166 220 173 241 192C259 207 270 229 278 251" stroke="#2B2E73" stroke-width="18" stroke-linecap="round"/>
   <path d="M369 174C344 168 321 177 301 195C285 210 273 230 262 255" stroke="#D4AA53" stroke-width="18" stroke-linecap="round"/>
 
-  <text x="270" y="515" text-anchor="middle" fill="url(#wordmark)" font-family="Poppins, Montserrat, Arial, sans-serif" font-size="78" font-weight="800" letter-spacing="3">SEVALINK</text>
+  <text x="270" y="515" text-anchor="middle" fill="url(#wordmark)" font-family="Poppins, Montserrat, Arial, sans-serif" font-size="54" font-weight="800" letter-spacing="1.4">SAMADHAN SETU</text>
   <text x="270" y="572" text-anchor="middle" fill="#242965" font-family="Georgia, Times New Roman, serif" font-size="34" font-weight="700" letter-spacing="1.4">CONNECT TO THE PEOPLE</text>
 </svg>

@@ -1,5 +1,6 @@
 require("./utils/loadEnv");
 
+const fs = require("fs");
 const express = require("express");
 const cors = require("cors");
 const mongoose = require("mongoose");
@@ -43,14 +44,28 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
-app.get("/", (req, res) => {
-  res.json({ message: "SevaLink backend running" });
+app.get("/api/health", (req, res) => {
+  res.json({ message: "Samadhan Setu backend running" });
 });
 
 app.use("/api/auth", authRoutes);
 app.use("/api/analytics", analyticsRoutes);
 app.use("/api/chat", chatRoutes);
 app.use("/api/tasks", taskRoutes);
+
+const clientBuildPath = path.resolve(__dirname, "../client/build");
+const clientIndexPath = path.join(clientBuildPath, "index.html");
+
+if (fs.existsSync(clientIndexPath)) {
+  app.use(express.static(clientBuildPath));
+  app.get(/^\/(?!api(?:\/|$)|uploads(?:\/|$)).*/, (req, res) => {
+    res.sendFile(clientIndexPath);
+  });
+} else {
+  app.get("/", (req, res) => {
+    res.json({ message: "Samadhan Setu backend running" });
+  });
+}
 
 async function startServer() {
   if (!MONGO_URI) {

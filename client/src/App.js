@@ -21,7 +21,7 @@ const Home = lazy(() => import("./Home"));
 const Tasks = lazy(() => import("./Tasks"));
 const Admin = lazy(() => import("./Admin"));
 const Auth = lazy(() => import("./Auth"));
-const INTRO_SEEN_KEY = "sevalink-intro-seen";
+const INTRO_SEEN_KEY = "samadhan-setu-intro-seen";
 
 function AppShell() {
   const [showIntro, setShowIntro] = useState(() => {
